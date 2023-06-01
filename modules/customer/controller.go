@@ -7,9 +7,9 @@ import (
 )
 
 type ControllerInterface interface {
-	GetByID(id uint) (any, error)
-	CreateCustomer(req CreateRequest) (any, error)
-	UpdateOrCreateCustomer(id uint, req CreateRequest) (any, error)
+	GetByID(id uint) (dto.BaseResponse, error)
+	CreateCustomer(req CreateRequest) (dto.BaseResponse, error)
+	UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error)
 	DeleteCustomer(id uint) error
 }
 
@@ -23,16 +23,30 @@ type controller struct {
 	customerUseCase UseCaseInterface
 }
 
-func (c controller) GetByID(id uint) (any, error) {
+func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 	customer, err := c.customerUseCase.GetByID(id)
 	if err != nil {
 		return dto.ErrorNotFound(fmt.Sprintf("Customer %d doesn't exist", id)), err
 	}
-	return dto.Success("Success retrieve data", customer), nil
+	customerRepresentation := mapCustomerToResponse(customer)
+	return dto.Success("Success retrieve data", customerRepresentation), nil
 }
 
-func (c controller) CreateCustomer(req CreateRequest) (any, error) {
+func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) {
 	customer := mapCreateRequestToCustomer(req)
+	exist, err := c.customerUseCase.IsEmailExist(customer)
+	if err != nil {
+		return dto.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Can't create customer",
+		}, err
+	}
+	if exist {
+		return dto.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Email already exist",
+		}, nil
+	}
 	if err := c.customerUseCase.CreateCustomer(&customer); err != nil {
 		return dto.BaseResponse{
 			Code:    http.StatusInternalServerError,
@@ -43,9 +57,22 @@ func (c controller) CreateCustomer(req CreateRequest) (any, error) {
 	return dto.Created("Success create customer", response), nil
 }
 
-func (c controller) UpdateOrCreateCustomer(id uint, req CreateRequest) (any, error) {
+func (c controller) UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error) {
 	customer := mapCreateRequestToCustomer(req)
 	customer.ID = id
+	exist, err := c.customerUseCase.IsEmailExist(customer)
+	if err != nil {
+		return dto.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Can't create customer",
+		}, err
+	}
+	if exist {
+		return dto.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Email already exist",
+		}, nil
+	}
 	if err := c.customerUseCase.UpdateOrCreateCustomer(&customer); err != nil {
 		return dto.BaseResponse{
 			Code:    http.StatusInternalServerError,
