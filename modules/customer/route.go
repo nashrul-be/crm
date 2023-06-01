@@ -17,7 +17,7 @@ func NewCustomerRoute(customerRepository repositories.CustomerRepositoryInterfac
 }
 
 func (r CustomerRoute) Handle(router *gin.Engine) {
-	customer := router.Group("/customer")
+	customer := router.Group("/customers")
 	customer.GET("/:id", r.customerRequestHandler.GetByID)
 	customer.POST("", r.customerRequestHandler.CreateCustomer)
 	customer.PUT("/:id", r.customerRequestHandler.UpdateOrCreateCustomer)
