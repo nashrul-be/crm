@@ -1,23 +1,32 @@
 package main
 
 import (
-	"github.com/dibimbing-satkom-indo/onion-architecture-go/dto"
-	"github.com/dibimbing-satkom-indo/onion-architecture-go/modules/user"
+	"github.com/gin-gonic/gin"
+	"nashrul-be/crm/modules/customer"
+	"nashrul-be/crm/repositories"
+	"nashrul-be/crm/utils/db"
 )
 
 func main() {
-	var request = dto.Request{
-		Body: map[string]string{
-			"id": "1",
-		},
-		Method: "GET",
-		Path:   "/get-user",
-		Header: map[string]string{
-			"Authorization": "token",
-		},
+	engine := gin.Default()
+
+	dbConn, err := db.Connect(db.Config{
+		User:     "root",
+		Password: "root",
+		Host:     "localhost",
+		Port:     "3306",
+		DBName:   "mini",
+	})
+
+	if err != nil {
+		panic(err.Error())
 	}
 
-	router := user.NewRouter()
-	router.Route(request)
+	userRepo := repositories.NewCustomerRepository(dbConn)
+	userRoute := customer.NewCustomerRoute(userRepo)
+	userRoute.Handle(engine)
 
+	if err := engine.Run(); err != nil {
+		panic(err.Error())
+	}
 }
