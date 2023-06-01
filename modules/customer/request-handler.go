@@ -35,7 +35,7 @@ func (h customerRequestHandler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Customer %d not found", id)))
 		return
 	}
-	c.JSON(http.StatusOK, response)
+	c.JSON(response.Code, response)
 }
 
 func (h customerRequestHandler) CreateCustomer(c *gin.Context) {
@@ -49,7 +49,7 @@ func (h customerRequestHandler) CreateCustomer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
 	}
-	c.JSON(http.StatusCreated, response)
+	c.JSON(response.Code, response)
 }
 
 func (h customerRequestHandler) UpdateOrCreateCustomer(c *gin.Context) {
@@ -70,7 +70,7 @@ func (h customerRequestHandler) UpdateOrCreateCustomer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
 	}
-	c.JSON(http.StatusOK, response)
+	c.JSON(response.Code, response)
 }
 
 func (h customerRequestHandler) DeleteCustomer(c *gin.Context) {
