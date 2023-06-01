@@ -3,6 +3,7 @@ package repositories
 import (
 	"gorm.io/gorm"
 	"nashrul-be/crm/entities"
+	"time"
 )
 
 type CustomerRepositoryInterface interface {
@@ -11,7 +12,8 @@ type CustomerRepositoryInterface interface {
 	Update(customer *entities.Customer) (err error)
 	UpdateOrCreate(customer *entities.Customer) (err error)
 	Delete(id uint) (err error)
-	IsExist(id uint) (bool, error)
+	IsExist(id uint) (exist bool, err error)
+	IsEmailExist(customer entities.Customer) (bool, error)
 }
 
 func NewCustomerRepository(db *gorm.DB) CustomerRepositoryInterface {
@@ -23,15 +25,22 @@ type customerRepository struct {
 }
 
 func (r customerRepository) IsExist(id uint) (exist bool, err error) {
-	_, err = r.GetByID(id)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			err = nil
-			return
-		}
+	var count int64
+	result := r.db.Model(&entities.Customer{}).Where("id = ?", id).Count(&count)
+	if result.Error != nil {
 		return
 	}
-	exist = true
+	exist = count > 0
+	return
+}
+
+func (r customerRepository) IsEmailExist(customer entities.Customer) (exist bool, err error) {
+	var count int64
+	result := r.db.Model(&entities.Customer{}).Where("email = ?", customer.Email).Where("id != ?", customer.ID).Count(&count)
+	if result.Error != nil {
+		return
+	}
+	exist = count > 0
 	return
 }
 
@@ -51,6 +60,7 @@ func (r customerRepository) Update(customer *entities.Customer) (err error) {
 }
 
 func (r customerRepository) UpdateOrCreate(customer *entities.Customer) (err error) {
+	customer.CreatedAt = time.Now()
 	err = r.db.Save(customer).Error
 	return
 }
