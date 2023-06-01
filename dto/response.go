@@ -3,9 +3,9 @@ package dto
 import "net/http"
 
 type BaseResponse struct {
-	Code    int
-	Message string
-	Data    any
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+	Data    any    `json:"data,omitempty"`
 }
 
 func ErrorNotFound(msgErr string) BaseResponse {
