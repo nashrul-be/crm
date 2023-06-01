@@ -10,6 +10,7 @@ type UseCaseInterface interface {
 	CreateCustomer(customer *entities.Customer) (err error)
 	UpdateOrCreateCustomer(customer *entities.Customer) (err error)
 	DeleteCustomer(id uint) (err error)
+	IsEmailExist(customer entities.Customer) (exist bool, err error)
 }
 
 func NewUseCase(repositoryInterface repositories.CustomerRepositoryInterface) UseCaseInterface {
@@ -18,6 +19,11 @@ func NewUseCase(repositoryInterface repositories.CustomerRepositoryInterface) Us
 
 type customerUseCase struct {
 	customerRepository repositories.CustomerRepositoryInterface
+}
+
+func (uc customerUseCase) IsEmailExist(customer entities.Customer) (exist bool, err error) {
+	exist, err = uc.customerRepository.IsEmailExist(customer)
+	return
 }
 
 func (uc customerUseCase) GetByID(id uint) (customer entities.Customer, err error) {
