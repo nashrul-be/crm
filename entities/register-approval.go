@@ -3,7 +3,7 @@ package entities
 type RegisterApproval struct {
 	ID           uint
 	AdminID      uint
-	Admin        Actor `gorm:"foreignKey:AdminID"`
+	Admin        Actor
 	SuperAdminID uint
 	Status       string
 }
