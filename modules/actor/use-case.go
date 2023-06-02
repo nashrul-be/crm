@@ -3,6 +3,7 @@ package actor
 import (
 	"nashrul-be/crm/entities"
 	"nashrul-be/crm/repositories"
+	"nashrul-be/crm/utils/hash"
 )
 
 type UseCaseInterface interface {
@@ -47,6 +48,10 @@ func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {
 }
 
 func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {
+	actor.Password, err = hash.Hash(actor.Password)
+	if err != nil {
+		return
+	}
 	err = uc.actorRepository.Create(actor)
 	if err != nil {
 		return
@@ -56,6 +61,12 @@ func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {
 }
 
 func (uc actorUseCase) UpdateActor(actor *entities.Actor) (err error) {
+	if actor.Password != "" {
+		actor.Password, err = hash.Hash(actor.Password)
+		if err != nil {
+			return
+		}
+	}
 	err = uc.actorRepository.Update(actor)
 	if err != nil {
 		return
