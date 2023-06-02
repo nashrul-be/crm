@@ -51,7 +51,7 @@ func (r actorRepository) GetByUsername(username string) (actor entities.Actor, e
 }
 
 func (r actorRepository) GetByUsernameBatch(username []string) (actors []entities.Actor, err error) {
-	err = r.db.Where("username IN ?", username).Find(&actors).Error
+	err = r.db.Find(&actors, "username IN ?", username).Error
 	return
 }
 
