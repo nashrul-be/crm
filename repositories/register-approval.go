@@ -41,7 +41,7 @@ func (r registerApprovalRepository) Create(approval *entities.RegisterApproval) 
 }
 
 func (r registerApprovalRepository) GetAllPendingApproval() (approvals []entities.RegisterApproval, err error) {
-	err = r.db.Where("status = ?", "pending").Find(approvals).Error
+	err = r.db.Preload("Admin").Find(&approvals, "status = ?", "pending").Error
 	return
 }
 
