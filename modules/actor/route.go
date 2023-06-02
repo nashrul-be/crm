@@ -9,8 +9,11 @@ type ActorRoute struct {
 	actorRequestHandler RequestHandlerInterface
 }
 
-func NewActorRoute(actorRepository repositories.ActorRepositoryInterface, roleRepository repositories.RoleRepositoryInterface) ActorRoute {
-	useCase := NewUseCase(actorRepository, roleRepository)
+func NewActorRoute(actorRepository repositories.ActorRepositoryInterface,
+	roleRepository repositories.RoleRepositoryInterface,
+	approvalRepository repositories.RegisterApprovalRepositoryInterface,
+) ActorRoute {
+	useCase := NewUseCase(actorRepository, roleRepository, approvalRepository)
 	actorController := NewController(useCase)
 	requestHandler := NewRequestHandler(actorController)
 	return ActorRoute{actorRequestHandler: requestHandler}

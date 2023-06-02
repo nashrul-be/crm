@@ -15,16 +15,22 @@ type UseCaseInterface interface {
 	IsExist(id uint) (exist bool, err error)
 }
 
-func NewUseCase(repositoryInterface repositories.ActorRepositoryInterface, roleRepositoryInterface repositories.RoleRepositoryInterface) UseCaseInterface {
+func NewUseCase(
+	repositoryInterface repositories.ActorRepositoryInterface,
+	roleRepositoryInterface repositories.RoleRepositoryInterface,
+	registerApprovalRepositoryInterface repositories.RegisterApprovalRepositoryInterface,
+) UseCaseInterface {
 	return actorUseCase{
-		actorRepository: repositoryInterface,
-		roleRepository:  roleRepositoryInterface,
+		actorRepository:            repositoryInterface,
+		roleRepository:             roleRepositoryInterface,
+		registerApprovalRepository: registerApprovalRepositoryInterface,
 	}
 }
 
 type actorUseCase struct {
-	actorRepository repositories.ActorRepositoryInterface
-	roleRepository  repositories.RoleRepositoryInterface
+	actorRepository            repositories.ActorRepositoryInterface
+	roleRepository             repositories.RoleRepositoryInterface
+	registerApprovalRepository repositories.RegisterApprovalRepositoryInterface
 }
 
 func (uc actorUseCase) IsExist(id uint) (exist bool, err error) {
@@ -52,10 +58,22 @@ func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {
 	if err != nil {
 		return
 	}
-	err = uc.actorRepository.Create(actor)
+	tx, err := uc.actorRepository.InitTransaction()
 	if err != nil {
 		return
 	}
+	actorTx := uc.actorRepository.Begin(tx)
+	registerApprovalTx := uc.registerApprovalRepository.Begin(tx)
+	if err = actorTx.Create(actor); err != nil {
+		tx.Rollback()
+		return
+	}
+	approval := &entities.RegisterApproval{AdminID: actor.ID, Status: "pending"}
+	if err = registerApprovalTx.Create(approval); err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
 	*actor, err = uc.GetByID(actor.ID)
 	return
 }

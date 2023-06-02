@@ -7,13 +7,17 @@ import (
 )
 
 type ActorRepositoryInterface interface {
-	GetByID(id uint) (customer entities.Actor, err error)
+	GetByID(id uint) (actor entities.Actor, err error)
+	GetByUsername(username string) (actor entities.Actor, err error)
+	GetByUsernameBatch(username []string) (actors []entities.Actor, err error)
 	IsUsernameExist(actor entities.Actor) (exist bool, err error)
 	IsExist(id uint) (exist bool, err error)
 	Create(customer *entities.Actor) (err error)
 	Update(customer *entities.Actor) (err error)
-	UpdateOrCreate(customer *entities.Actor) (err error)
+	UpdateOrCreate(actor *entities.Actor) (err error)
 	Delete(id uint) (err error)
+	InitTransaction() (*gorm.DB, error)
+	Begin(db *gorm.DB) ActorRepositoryInterface
 }
 
 func NewActorRepository(db *gorm.DB) ActorRepositoryInterface {
@@ -24,8 +28,30 @@ type actorRepository struct {
 	db *gorm.DB
 }
 
+func (r actorRepository) InitTransaction() (*gorm.DB, error) {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return tx, nil
+}
+
+func (r actorRepository) Begin(db *gorm.DB) ActorRepositoryInterface {
+	return actorRepository{db: db}
+}
+
 func (r actorRepository) GetByID(id uint) (actor entities.Actor, err error) {
 	err = r.db.First(&actor, id).Error
+	return
+}
+
+func (r actorRepository) GetByUsername(username string) (actor entities.Actor, err error) {
+	err = r.db.First(&actor, "username = ?", username).Error
+	return
+}
+
+func (r actorRepository) GetByUsernameBatch(username []string) (actors []entities.Actor, err error) {
+	err = r.db.Find(&actors, "username IN ?", username).Error
 	return
 }
 
