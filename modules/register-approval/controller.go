@@ -35,11 +35,11 @@ func (c controller) GetAllPendingApproval() (dto.BaseResponse, error) {
 }
 
 func (c controller) Approve(request ApproveRequest) (dto.BaseResponse, error) {
-	approved, err := c.approvalUseCase.Approve(request.Approved, 1)
+	approved, err := c.approvalUseCase.Approve(request.Approve, 1)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	rejected, err := c.approvalUseCase.Rejected(request.Rejected, 1)
+	rejected, err := c.approvalUseCase.Rejected(request.Reject, 1)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
@@ -48,7 +48,7 @@ func (c controller) Approve(request ApproveRequest) (dto.BaseResponse, error) {
 		Message: "Success update approval",
 		Data: ApproveResponse{
 			Success: append(approved["success"], rejected["success"]...),
-			Fail:    append(approved["success"], rejected["success"]...),
+			Fail:    append(approved["failed"], rejected["failed"]...),
 		},
 	}, nil
 }

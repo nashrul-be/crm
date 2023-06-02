@@ -48,12 +48,12 @@ func (uc registerApprovalUseCase) Approve(username []string, superAdminID uint) 
 		"success": {},
 		"failed":  {},
 	}
-	for index, _ := range actors {
+	for index, _ := range approvals {
 		err = uc.approved(&actors[index], &approvals[index], superAdminID)
 		if err != nil {
-			result["success"] = append(result["success"], actors[index].Username)
-		} else {
 			result["failed"] = append(result["failed"], actors[index].Username)
+		} else {
+			result["success"] = append(result["success"], actors[index].Username)
 		}
 	}
 	return
@@ -103,12 +103,12 @@ func (uc registerApprovalUseCase) Rejected(username []string, superAdminID uint)
 	if err != nil {
 		return
 	}
-	for index, _ := range actors {
-		err = uc.approved(&actors[index], &approvals[index], superAdminID)
+	for index, _ := range approvals {
+		err = uc.rejected(&approvals[index], superAdminID)
 		if err != nil {
-			result["success"] = append(result["success"], actors[index].Username)
-		} else {
 			result["failed"] = append(result["failed"], actors[index].Username)
+		} else {
+			result["success"] = append(result["success"], actors[index].Username)
 		}
 	}
 	return

@@ -5,8 +5,8 @@ type Representation struct {
 }
 
 type ApproveRequest struct {
-	Approved []string `json:"approved"`
-	Rejected []string `json:"rejected"`
+	Approve []string `json:"approve"`
+	Reject  []string `json:"reject"`
 }
 
 type ApproveResponse struct {
