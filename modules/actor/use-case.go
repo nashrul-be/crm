@@ -8,6 +8,7 @@ import (
 
 type UseCaseInterface interface {
 	GetByID(id uint) (actor entities.Actor, err error)
+	GetByUsername(username string) (actor entities.Actor, err error)
 	CreateActor(actor *entities.Actor) (err error)
 	UpdateActor(actor *entities.Actor) (err error)
 	DeleteActor(id uint) (err error)
@@ -45,6 +46,16 @@ func (uc actorUseCase) IsUsernameExist(actor entities.Actor) (exist bool, err er
 
 func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {
 	actor, err = uc.actorRepository.GetByID(id)
+	if err != nil {
+		return
+	}
+	role, err := uc.roleRepository.GetByID(actor.RoleID)
+	actor.Role = role
+	return
+}
+
+func (uc actorUseCase) GetByUsername(username string) (actor entities.Actor, err error) {
+	actor, err = uc.actorRepository.GetByUsername(username)
 	if err != nil {
 		return
 	}
