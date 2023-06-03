@@ -86,7 +86,9 @@ func (r actorRepository) Update(customer *entities.Actor) (err error) {
 }
 
 func (r actorRepository) UpdateOrCreate(customer *entities.Actor) (err error) {
-	customer.CreatedAt = time.Now()
+	if customer.CreatedAt.IsZero() {
+		customer.CreatedAt = time.Now()
+	}
 	err = r.db.Save(customer).Error
 	return
 }

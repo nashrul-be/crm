@@ -9,6 +9,7 @@ import (
 type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
 	CreateActor(req CreateRequest) (dto.BaseResponse, error)
+	ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResponse, error)
 	UpdateActor(req UpdateRequest) (dto.BaseResponse, error)
 	DeleteActor(id uint) error
 }
@@ -55,6 +56,32 @@ func (c controller) CreateActor(req CreateRequest) (dto.BaseResponse, error) {
 	}
 	response := mapActorToResponse(actor)
 	return dto.Created("Success create actor", response), nil
+}
+
+func (c controller) ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResponse, error) {
+	result := map[string][]string{
+		"success": {},
+		"failed":  {},
+	}
+	activate, err := c.actorUseCase.ActivateActor(request.Activate)
+	if err != nil {
+		result["failed"] = append(result["failed"], request.Activate...)
+	} else {
+		result["success"] = append(result["success"], activate["success"]...)
+		result["failed"] = append(result["failed"], activate["failed"]...)
+	}
+	deactivate, err := c.actorUseCase.DeactivateActor(request.Deactivate)
+	if err != nil {
+		result["failed"] = append(result["failed"], request.Deactivate...)
+	} else {
+		result["success"] = append(result["success"], deactivate["success"]...)
+		result["failed"] = append(result["failed"], deactivate["failed"]...)
+	}
+	return dto.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Activate/Deactivate success",
+		Data:    result,
+	}, nil
 }
 
 func (c controller) UpdateActor(req UpdateRequest) (dto.BaseResponse, error) {

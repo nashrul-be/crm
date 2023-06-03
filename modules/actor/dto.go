@@ -13,6 +13,11 @@ type UpdateRequest struct {
 	Password string `json:"password" binding:"printascii"`
 }
 
+type ChangeActiveRequest struct {
+	Activate   []string `json:"activate"`
+	Deactivate []string `json:"deactivate"`
+}
+
 type Representation struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
