@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/modules/actor"
+	"nashrul-be/crm/modules/authentication"
 	"nashrul-be/crm/modules/customer"
 	register_approval "nashrul-be/crm/modules/register-approval"
 	"nashrul-be/crm/repositories"
@@ -37,6 +38,10 @@ func main() {
 
 	approveRoute := register_approval.NewApprovalRoute(actorRepo, approvalRepo)
 	approveRoute.Handle(engine)
+
+	actorUseCase := actor.NewUseCase(actorRepo, roleRepo, approvalRepo)
+	authRoute := authentication.NewAuthRoute(actorUseCase)
+	authRoute.Handle(engine)
 
 	if err := engine.Run(); err != nil {
 		panic(err.Error())

@@ -2,6 +2,7 @@ package customer
 
 import (
 	"github.com/gin-gonic/gin"
+	"nashrul-be/crm/middleware"
 	"nashrul-be/crm/repositories"
 )
 
@@ -17,7 +18,7 @@ func NewCustomerRoute(customerRepository repositories.CustomerRepositoryInterfac
 }
 
 func (r CustomerRoute) Handle(router *gin.Engine) {
-	customer := router.Group("/customers")
+	customer := router.Group("/customers", middleware.Authenticate())
 	customer.GET("/:id", r.customerRequestHandler.GetByID)
 	customer.POST("", r.customerRequestHandler.CreateCustomer)
 	customer.PUT("/:id", r.customerRequestHandler.UpdateOrCreateCustomer)

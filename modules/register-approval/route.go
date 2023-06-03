@@ -2,6 +2,7 @@ package register_approval
 
 import (
 	"github.com/gin-gonic/gin"
+	"nashrul-be/crm/middleware"
 	"nashrul-be/crm/repositories"
 )
 
@@ -18,7 +19,7 @@ func NewApprovalRoute(actorRepository repositories.ActorRepositoryInterface,
 }
 
 func (r ApprovalRoute) Handle(router *gin.Engine) {
-	group := router.Group("/actors")
+	group := router.Group("/actors", middleware.Authenticate(), middleware.AuthorizationWithRole([]string{"super_admin"}))
 	group.GET("/approve", r.approvalRequestHandler.GetAllPendingApproval)
 	group.PUT("/approve", r.approvalRequestHandler.Approve)
 }

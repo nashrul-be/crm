@@ -2,6 +2,7 @@ package actor
 
 import (
 	"github.com/gin-gonic/gin"
+	"nashrul-be/crm/middleware"
 	"nashrul-be/crm/repositories"
 )
 
@@ -20,9 +21,9 @@ func NewActorRoute(actorRepository repositories.ActorRepositoryInterface,
 }
 
 func (r ActorRoute) Handle(router *gin.Engine) {
-	actor := router.Group("/actors")
+	actor := router.Group("/actors", middleware.Authenticate())
 	actor.GET("/:id", r.actorRequestHandler.GetByID)
 	actor.POST("", r.actorRequestHandler.CreateActor)
 	actor.PATCH("/:id", r.actorRequestHandler.UpdateActor)
-	actor.DELETE("/:id", r.actorRequestHandler.DeleteActor)
+	actor.DELETE("/:id", middleware.AuthorizationWithRole([]string{"super_admin"}), r.actorRequestHandler.DeleteActor)
 }
