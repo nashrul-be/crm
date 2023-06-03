@@ -8,6 +8,7 @@ import (
 
 type UseCaseInterface interface {
 	GetByID(id uint) (actor entities.Actor, err error)
+	GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error)
 	GetByUsername(username string) (actor entities.Actor, err error)
 	CreateActor(actor *entities.Actor) (err error)
 	ActivateActor(usernames []string) (map[string][]string, error)
@@ -64,6 +65,11 @@ func (uc actorUseCase) GetByUsername(username string) (actor entities.Actor, err
 	role, err := uc.roleRepository.GetByID(actor.RoleID)
 	actor.Role = role
 	return
+}
+
+func (uc actorUseCase) GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error) {
+	actors, err := uc.actorRepository.GetAllByUsername(username, limit, offset)
+	return actors, err
 }
 
 func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {

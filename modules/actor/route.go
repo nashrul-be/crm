@@ -23,6 +23,7 @@ func NewActorRoute(actorRepository repositories.ActorRepositoryInterface,
 func (r ActorRoute) Handle(router *gin.Engine) {
 	actor := router.Group("/actors", middleware.Authenticate())
 	actor.GET("/:id", r.actorRequestHandler.GetByID)
+	actor.GET("", r.actorRequestHandler.GetAllByUsername)
 	actor.POST("", r.actorRequestHandler.CreateActor)
 	actor.PATCH("/active", middleware.AuthorizationWithRole([]string{"super_admin"}), r.actorRequestHandler.ChangeActiveActor)
 	actor.PATCH("/:id", r.actorRequestHandler.UpdateActor)
