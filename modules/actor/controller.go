@@ -9,7 +9,7 @@ import (
 type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
 	CreateActor(req CreateRequest) (dto.BaseResponse, error)
-	UpdateActor(id uint, req UpdateRequest) (dto.BaseResponse, error)
+	UpdateActor(req UpdateRequest) (dto.BaseResponse, error)
 	DeleteActor(id uint) error
 }
 
@@ -57,10 +57,9 @@ func (c controller) CreateActor(req CreateRequest) (dto.BaseResponse, error) {
 	return dto.Created("Success create actor", response), nil
 }
 
-func (c controller) UpdateActor(id uint, req UpdateRequest) (dto.BaseResponse, error) {
+func (c controller) UpdateActor(req UpdateRequest) (dto.BaseResponse, error) {
 	actor := mapUpdateRequestToActor(req)
-	actor.ID = id
-	exist, err := c.actorUseCase.IsExist(id)
+	exist, err := c.actorUseCase.IsExist(actor.ID)
 	if err != nil {
 		return dto.BaseResponse{
 			Code:    http.StatusInternalServerError,

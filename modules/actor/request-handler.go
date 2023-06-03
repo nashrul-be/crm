@@ -65,7 +65,8 @@ func (h actorRequestHandler) UpdateActor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	response, err := h.actorController.UpdateActor(uint(id), request)
+	request.ID = uint(id)
+	response, err := h.actorController.UpdateActor(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return

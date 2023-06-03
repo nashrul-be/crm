@@ -8,6 +8,7 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
+	ID       uint
 	Username string `json:"username" binding:"printascii"`
 	Password string `json:"password" binding:"printascii"`
 }
