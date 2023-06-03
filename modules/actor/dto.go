@@ -8,8 +8,14 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
+	ID       uint
 	Username string `json:"username" binding:"printascii"`
 	Password string `json:"password" binding:"printascii"`
+}
+
+type ChangeActiveRequest struct {
+	Activate   []string `json:"activate"`
+	Deactivate []string `json:"deactivate"`
 }
 
 type Representation struct {

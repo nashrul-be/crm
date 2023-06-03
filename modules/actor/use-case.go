@@ -10,6 +10,8 @@ type UseCaseInterface interface {
 	GetByID(id uint) (actor entities.Actor, err error)
 	GetByUsername(username string) (actor entities.Actor, err error)
 	CreateActor(actor *entities.Actor) (err error)
+	ActivateActor(usernames []string) (map[string][]string, error)
+	DeactivateActor(usernames []string) (map[string][]string, error)
 	UpdateActor(actor *entities.Actor) (err error)
 	DeleteActor(id uint) (err error)
 	IsUsernameExist(actor entities.Actor) (exist bool, err error)
@@ -102,6 +104,53 @@ func (uc actorUseCase) UpdateActor(actor *entities.Actor) (err error) {
 	}
 	*actor, err = uc.GetByID(actor.ID)
 	return
+}
+
+func notFound(queries []string, results []entities.Actor) []string {
+	mapResult := make(map[string]bool)
+	for _, result := range results {
+		mapResult[result.Username] = true
+	}
+	diff := make([]string, 0)
+	for _, query := range queries {
+		if !mapResult[query] {
+			diff = append(diff, query)
+		}
+	}
+	return diff
+}
+
+func (uc actorUseCase) changeActiveActor(usernames []string, value bool) (map[string][]string, error) {
+	actors, err := uc.actorRepository.GetByUsernameBatch(usernames)
+	failed := notFound(usernames, actors)
+	if err != nil {
+		return nil, err
+	}
+	result := map[string][]string{
+		"success": {},
+		"failed":  failed,
+	}
+	for _, actor := range actors {
+		if !actor.Verified {
+			result["failed"] = append(result["failed"], actor.Username)
+			continue
+		}
+		actor.Active = value
+		if err := uc.actorRepository.UpdateOrCreate(&actor); err != nil {
+			result["failed"] = append(result["failed"], actor.Username)
+		} else {
+			result["success"] = append(result["success"], actor.Username)
+		}
+	}
+	return result, nil
+}
+
+func (uc actorUseCase) ActivateActor(usernames []string) (map[string][]string, error) {
+	return uc.changeActiveActor(usernames, true)
+}
+
+func (uc actorUseCase) DeactivateActor(usernames []string) (map[string][]string, error) {
+	return uc.changeActiveActor(usernames, false)
 }
 
 func (uc actorUseCase) DeleteActor(id uint) (err error) {

@@ -14,6 +14,7 @@ func mapCreateRequestToActor(request CreateRequest) entities.Actor {
 
 func mapUpdateRequestToActor(request UpdateRequest) entities.Actor {
 	return entities.Actor{
+		ID:       request.ID,
 		Username: request.Username,
 		Password: request.Password,
 	}

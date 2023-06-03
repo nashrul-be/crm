@@ -11,6 +11,7 @@ import (
 type RequestHandlerInterface interface {
 	GetByID(c *gin.Context)
 	CreateActor(c *gin.Context)
+	ChangeActiveActor(c *gin.Context)
 	UpdateActor(c *gin.Context)
 	DeleteActor(c *gin.Context)
 }
@@ -52,6 +53,20 @@ func (h actorRequestHandler) CreateActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
+func (h actorRequestHandler) ChangeActiveActor(c *gin.Context) {
+	var request ChangeActiveRequest
+	if err := c.Bind(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		return
+	}
+	response, err := h.actorController.ChangeActiveActor(request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
+		return
+	}
+	c.JSON(response.Code, response)
+}
+
 func (h actorRequestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
 	uriParam := c.Param("id")
@@ -65,7 +80,8 @@ func (h actorRequestHandler) UpdateActor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	response, err := h.actorController.UpdateActor(uint(id), request)
+	request.ID = uint(id)
+	response, err := h.actorController.UpdateActor(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
