@@ -8,6 +8,7 @@ import (
 
 type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
+	GetAllByUsername(req PaginationRequest) (dto.BaseResponse, error)
 	CreateActor(req CreateRequest) (dto.BaseResponse, error)
 	ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResponse, error)
 	UpdateActor(req UpdateRequest) (dto.BaseResponse, error)
@@ -31,6 +32,23 @@ func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 	}
 	actorRepresentation := mapActorToResponse(actor)
 	return dto.Success("Success retrieve data", actorRepresentation), nil
+}
+
+func (c controller) GetAllByUsername(req PaginationRequest) (dto.BaseResponse, error) {
+	offset := (req.Page - 1) * req.PerPage
+	actors, err := c.actorUseCase.GetAllByUsername(req.Username+"%", req.PerPage, offset)
+	if err != nil {
+		return dto.ErrorInternalServerError(), err
+	}
+	actorResponse := make([]Representation, 0)
+	for _, actor := range actors {
+		actorResponse = append(actorResponse, mapActorToResponse(actor))
+	}
+	return dto.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success retrieve actor",
+		Data:    actorResponse,
+	}, err
 }
 
 func (c controller) CreateActor(req CreateRequest) (dto.BaseResponse, error) {

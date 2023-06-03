@@ -24,3 +24,9 @@ type Representation struct {
 	Verified bool   `json:"verified"`
 	Active   bool   `json:"active"`
 }
+
+type PaginationRequest struct {
+	PerPage  uint   `json:"per_page" binding:"gt=0"`
+	Page     uint   `json:"page" binding:"gt=0"`
+	Username string `json:"username"`
+}

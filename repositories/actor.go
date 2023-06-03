@@ -8,6 +8,7 @@ import (
 
 type ActorRepositoryInterface interface {
 	GetByID(id uint) (actor entities.Actor, err error)
+	GetAllByUsername(username string, limit, offset uint) (actor []entities.Actor, err error)
 	GetByUsername(username string) (actor entities.Actor, err error)
 	GetByUsernameBatch(username []string) (actors []entities.Actor, err error)
 	IsUsernameExist(actor entities.Actor) (exist bool, err error)
@@ -42,6 +43,12 @@ func (r actorRepository) Begin(db *gorm.DB) ActorRepositoryInterface {
 
 func (r actorRepository) GetByID(id uint) (actor entities.Actor, err error) {
 	err = r.db.First(&actor, id).Error
+	return
+}
+
+func (r actorRepository) GetAllByUsername(username string, limit, offset uint) (actor []entities.Actor, err error) {
+	err = r.db.Model(&entities.Actor{}).Preload("Role").Where("username LIKE ?", username).
+		Limit(int(limit)).Offset(int(offset)).Find(&actor).Error
 	return
 }
 

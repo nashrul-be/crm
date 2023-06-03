@@ -10,6 +10,7 @@ import (
 
 type RequestHandlerInterface interface {
 	GetByID(c *gin.Context)
+	GetAllByUsername(c *gin.Context)
 	CreateActor(c *gin.Context)
 	ChangeActiveActor(c *gin.Context)
 	UpdateActor(c *gin.Context)
@@ -34,6 +35,27 @@ func (h actorRequestHandler) GetByID(c *gin.Context) {
 	response, err := h.actorController.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Actor %d not found", id)))
+		return
+	}
+	c.JSON(response.Code, response)
+}
+
+func (h actorRequestHandler) GetAllByUsername(c *gin.Context) {
+	perPage, _ := strconv.Atoi(c.Query("perpage"))
+	page, _ := strconv.Atoi(c.Query("page"))
+	username := c.Query("username")
+	if perPage < 1 || page < 1 {
+		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest("perPage or page must be more than zero"))
+		return
+	}
+	request := PaginationRequest{
+		PerPage:  uint(perPage),
+		Page:     uint(page),
+		Username: username,
+	}
+	response, err := h.actorController.GetAllByUsername(request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
 	}
 	c.JSON(response.Code, response)
