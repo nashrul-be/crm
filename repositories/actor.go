@@ -65,8 +65,8 @@ func (r actorRepository) GetByUsernameBatch(username []string) (actors []entitie
 
 func (r actorRepository) IsExist(id uint) (exist bool, err error) {
 	var count int64
-	result := r.db.Model(&entities.Actor{}).Where("id = ?", id).Count(&count)
-	if result.Error != nil {
+	err = r.db.Model(&entities.Actor{}).Where("id = ?", id).Count(&count).Error
+	if err != nil {
 		return
 	}
 	exist = count > 0
@@ -75,8 +75,8 @@ func (r actorRepository) IsExist(id uint) (exist bool, err error) {
 
 func (r actorRepository) IsUsernameExist(actor entities.Actor) (exist bool, err error) {
 	var count int64
-	result := r.db.Model(&entities.Actor{}).Where("username = ?", actor.Username).Where("id != ?", actor.ID).Count(&count)
-	if result.Error != nil {
+	err = r.db.Model(&entities.Actor{}).Where("username = ?", actor.Username).Where("id != ?", actor.ID).Count(&count).Error
+	if err != nil {
 		return
 	}
 	exist = count > 0
