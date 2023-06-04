@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"nashrul-be/crm/entities"
 	"time"
@@ -15,7 +16,7 @@ type ActorRepositoryInterface interface {
 	IsExist(id uint) (exist bool, err error)
 	Create(customer *entities.Actor) (err error)
 	Update(customer *entities.Actor) (err error)
-	UpdateOrCreate(actor *entities.Actor) (err error)
+	Save(actor *entities.Actor) (err error)
 	Delete(id uint) (err error)
 	InitTransaction() (*gorm.DB, error)
 	Begin(db *gorm.DB) ActorRepositoryInterface
@@ -92,9 +93,16 @@ func (r actorRepository) Update(customer *entities.Actor) (err error) {
 	return
 }
 
-func (r actorRepository) UpdateOrCreate(customer *entities.Actor) (err error) {
+func (r actorRepository) Save(customer *entities.Actor) (err error) {
 	if customer.CreatedAt.IsZero() {
 		customer.CreatedAt = time.Now()
+	}
+	exist, err := r.IsExist(customer.ID)
+	if err != nil {
+		return
+	}
+	if !exist {
+		return errors.New("actor doesn't exist")
 	}
 	err = r.db.Save(customer).Error
 	return
