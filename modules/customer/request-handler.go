@@ -10,6 +10,7 @@ import (
 
 type RequestHandlerInterface interface {
 	GetByID(c *gin.Context)
+	GetAll(c *gin.Context)
 	CreateCustomer(c *gin.Context)
 	UpdateOrCreateCustomer(c *gin.Context)
 	DeleteCustomer(c *gin.Context)
@@ -33,6 +34,20 @@ func (h customerRequestHandler) GetByID(c *gin.Context) {
 	response, err := h.customerController.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Customer %d not found", id)))
+		return
+	}
+	c.JSON(response.Code, response)
+}
+
+func (h customerRequestHandler) GetAll(c *gin.Context) {
+	var request PaginationRequest
+	if err := c.BindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		return
+	}
+	response, err := h.customerController.GetAll(request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
 	}
 	c.JSON(response.Code, response)

@@ -3,12 +3,14 @@ package customer
 import (
 	"fmt"
 	"nashrul-be/crm/dto"
+	"nashrul-be/crm/entities"
 	"net/http"
 )
 
 type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
 	CreateCustomer(req CreateRequest) (dto.BaseResponse, error)
+	GetAll(req PaginationRequest) (dto.BaseResponse, error)
 	UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error)
 	DeleteCustomer(id uint) error
 }
@@ -30,6 +32,32 @@ func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 	}
 	customerRepresentation := mapCustomerToResponse(customer)
 	return dto.Success("Success retrieve data", customerRepresentation), nil
+}
+
+func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
+	var customers []entities.Customer
+	var err error
+	offset := (req.Page - 1) * req.PerPage
+	switch {
+	case req.Email != "":
+		customers, err = c.customerUseCase.GetAllByEmail(req.Email+"%", req.PerPage, offset)
+	case req.Name != "":
+		customers, err = c.customerUseCase.GetAllByName(req.Name+"%", req.PerPage, offset)
+	default:
+		customers, err = c.customerUseCase.GetAllByEmail("%", req.PerPage, offset)
+	}
+	if err != nil {
+		return dto.ErrorInternalServerError(), err
+	}
+	result := make([]Representation, 0)
+	for _, customer := range customers {
+		result = append(result, mapCustomerToResponse(customer))
+	}
+	return dto.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success retrieve customers",
+		Data:    result,
+	}, nil
 }
 
 func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) {

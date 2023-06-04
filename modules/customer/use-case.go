@@ -7,6 +7,8 @@ import (
 
 type UseCaseInterface interface {
 	GetByID(id uint) (customer entities.Customer, err error)
+	GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error)
+	GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error)
 	CreateCustomer(customer *entities.Customer) (err error)
 	UpdateOrCreateCustomer(customer *entities.Customer) (err error)
 	DeleteCustomer(id uint) (err error)
@@ -28,6 +30,16 @@ func (uc customerUseCase) IsEmailExist(customer entities.Customer) (exist bool, 
 
 func (uc customerUseCase) GetByID(id uint) (customer entities.Customer, err error) {
 	customer, err = uc.customerRepository.GetByID(id)
+	return
+}
+
+func (uc customerUseCase) GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error) {
+	customers, err = uc.customerRepository.GetAllByEmail(email, limit, offset)
+	return
+}
+
+func (uc customerUseCase) GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error) {
+	customers, err = uc.customerRepository.GetAllByName(name, limit, offset)
 	return
 }
 

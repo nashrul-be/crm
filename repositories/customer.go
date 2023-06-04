@@ -8,6 +8,8 @@ import (
 
 type CustomerRepositoryInterface interface {
 	GetByID(id uint) (customer entities.Customer, err error)
+	GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error)
+	GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error)
 	Create(customer *entities.Customer) (err error)
 	Update(customer *entities.Customer) (err error)
 	UpdateOrCreate(customer *entities.Customer) (err error)
@@ -36,11 +38,24 @@ func (r customerRepository) IsExist(id uint) (exist bool, err error) {
 
 func (r customerRepository) IsEmailExist(customer entities.Customer) (exist bool, err error) {
 	var count int64
-	result := r.db.Model(&entities.Customer{}).Where("email = ?", customer.Email).Where("id != ?", customer.ID).Count(&count)
+	result := r.db.Model(&entities.Customer{}).Where("email = ?", customer.Email).
+		Where("id != ?", customer.ID).Count(&count)
 	if result.Error != nil {
 		return
 	}
 	exist = count > 0
+	return
+}
+
+func (r customerRepository) GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error) {
+	err = r.db.Model(&entities.Customer{}).Where("email LIKE ?", email).Offset(int(offset)).
+		Limit(int(limit)).Find(&customers).Error
+	return
+}
+
+func (r customerRepository) GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error) {
+	err = r.db.Model(&entities.Customer{}).Where("concat(first_name, \" \", last_name) LIKE ?", name).
+		Offset(int(offset)).Limit(int(limit)).Find(&customers).Error
 	return
 }
 
