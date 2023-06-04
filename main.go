@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"nashrul-be/crm/modules/actor"
 	"nashrul-be/crm/modules/authentication"
 	"nashrul-be/crm/modules/customer"
@@ -11,16 +12,13 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		panic(err.Error())
+	}
+
 	engine := gin.Default()
 
-	dbConn, err := db.Connect(db.Config{
-		User:     "root",
-		Password: "root",
-		Host:     "localhost",
-		Port:     "3306",
-		DBName:   "mini",
-	})
-
+	dbConn, err := db.DefaultConnection()
 	if err != nil {
 		panic(err.Error())
 	}
