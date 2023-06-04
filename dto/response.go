@@ -29,6 +29,13 @@ func ErrorInternalServerError() BaseResponse {
 	}
 }
 
+func ErrorUnauthorized(msg string) BaseResponse {
+	return BaseResponse{
+		Code:    http.StatusUnauthorized,
+		Message: msg,
+	}
+}
+
 func Success(msg string, data any) BaseResponse {
 	return BaseResponse{
 		Code:    http.StatusOK,
