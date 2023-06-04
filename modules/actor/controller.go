@@ -81,19 +81,19 @@ func (c controller) ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResp
 		"success": {},
 		"failed":  {},
 	}
-	activate, err := c.actorUseCase.ActivateActor(request.Activate)
-	if err != nil {
-		result["failed"] = append(result["failed"], request.Activate...)
-	} else {
-		result["success"] = append(result["success"], activate["success"]...)
-		result["failed"] = append(result["failed"], activate["failed"]...)
+	for _, username := range request.Activate {
+		if err := c.actorUseCase.ActivateActor(username); err != nil {
+			result["failed"] = append(result["failed"], username)
+		} else {
+			result["success"] = append(result["success"], username)
+		}
 	}
-	deactivate, err := c.actorUseCase.DeactivateActor(request.Deactivate)
-	if err != nil {
-		result["failed"] = append(result["failed"], request.Deactivate...)
-	} else {
-		result["success"] = append(result["success"], deactivate["success"]...)
-		result["failed"] = append(result["failed"], deactivate["failed"]...)
+	for _, username := range request.Deactivate {
+		if err := c.actorUseCase.DeactivateActor(username); err != nil {
+			result["failed"] = append(result["failed"], username)
+		} else {
+			result["success"] = append(result["success"], username)
+		}
 	}
 	return dto.BaseResponse{
 		Code:    http.StatusOK,
