@@ -3,7 +3,6 @@ package actor
 import (
 	"fmt"
 	"nashrul-be/crm/dto"
-	"net/http"
 )
 
 type ControllerInterface interface {
@@ -44,33 +43,20 @@ func (c controller) GetAllByUsername(req PaginationRequest) (dto.BaseResponse, e
 	for _, actor := range actors {
 		actorResponse = append(actorResponse, mapActorToResponse(actor))
 	}
-	return dto.BaseResponse{
-		Code:    http.StatusOK,
-		Message: "Success retrieve actor",
-		Data:    actorResponse,
-	}, err
+	return dto.Success("Success retrieve actor", actorResponse), err
 }
 
 func (c controller) CreateActor(req CreateRequest) (dto.BaseResponse, error) {
 	actor := mapCreateRequestToActor(req)
-	exist, err := c.actorUseCase.IsUsernameExist(actor)
+	validationErr, err := c.actorUseCase.validateActor(actor, validateUsername)
 	if err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create actor",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
-	if exist {
-		return dto.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Username already exist",
-		}, nil
+	if validationErr != nil {
+		return dto.ErrorBadRequest(validationErr.Error()), nil
 	}
 	if err := c.actorUseCase.CreateActor(&actor); err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create actor",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	response := mapActorToResponse(actor)
 	return dto.Created("Success create actor", response), nil
@@ -81,62 +67,34 @@ func (c controller) ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResp
 		"success": {},
 		"failed":  {},
 	}
-	activate, err := c.actorUseCase.ActivateActor(request.Activate)
-	if err != nil {
-		result["failed"] = append(result["failed"], request.Activate...)
-	} else {
-		result["success"] = append(result["success"], activate["success"]...)
-		result["failed"] = append(result["failed"], activate["failed"]...)
+	for _, username := range request.Activate {
+		if err := c.actorUseCase.ActivateActor(username); err != nil {
+			result["failed"] = append(result["failed"], username)
+		} else {
+			result["success"] = append(result["success"], username)
+		}
 	}
-	deactivate, err := c.actorUseCase.DeactivateActor(request.Deactivate)
-	if err != nil {
-		result["failed"] = append(result["failed"], request.Deactivate...)
-	} else {
-		result["success"] = append(result["success"], deactivate["success"]...)
-		result["failed"] = append(result["failed"], deactivate["failed"]...)
+	for _, username := range request.Deactivate {
+		if err := c.actorUseCase.DeactivateActor(username); err != nil {
+			result["failed"] = append(result["failed"], username)
+		} else {
+			result["success"] = append(result["success"], username)
+		}
 	}
-	return dto.BaseResponse{
-		Code:    http.StatusOK,
-		Message: "Activate/Deactivate success",
-		Data:    result,
-	}, nil
+	return dto.Success("Activate/Deactivate success", result), nil
 }
 
 func (c controller) UpdateActor(req UpdateRequest) (dto.BaseResponse, error) {
 	actor := mapUpdateRequestToActor(req)
-	exist, err := c.actorUseCase.IsExist(actor.ID)
+	validationErr, err := c.actorUseCase.validateActor(actor, validateId, validateUsername)
 	if err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create actor",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
-	if !exist {
-		return dto.BaseResponse{
-			Code:    http.StatusNotFound,
-			Message: "Actor not found",
-		}, nil
-	}
-	if actor.Username != "" {
-		exist, err := c.actorUseCase.IsUsernameExist(actor)
-		if err != nil {
-			return dto.BaseResponse{
-				Code:    http.StatusInternalServerError,
-				Message: "Can't create actor",
-			}, err
-		}
-		if exist {
-			return dto.BaseResponse{
-				Code:    http.StatusBadRequest,
-				Message: "Username already exist",
-			}, nil
-		}
+	if validationErr != nil {
+		return dto.ErrorBadRequest(validationErr.Error()), nil
 	}
 	if err := c.actorUseCase.UpdateActor(&actor); err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't update actor",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	response := mapActorToResponse(actor)
 	return dto.Success("Success update actor", response), nil

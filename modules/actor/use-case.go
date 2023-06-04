@@ -1,22 +1,22 @@
 package actor
 
 import (
+	"errors"
 	"nashrul-be/crm/entities"
 	"nashrul-be/crm/repositories"
 	"nashrul-be/crm/utils/hash"
 )
 
 type UseCaseInterface interface {
+	validateActor(actor entities.Actor, validations ...validateFunc) (error, error)
 	GetByID(id uint) (actor entities.Actor, err error)
 	GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error)
 	GetByUsername(username string) (actor entities.Actor, err error)
 	CreateActor(actor *entities.Actor) (err error)
-	ActivateActor(usernames []string) (map[string][]string, error)
-	DeactivateActor(usernames []string) (map[string][]string, error)
+	ActivateActor(usernames string) error
+	DeactivateActor(usernames string) error
 	UpdateActor(actor *entities.Actor) (err error)
 	DeleteActor(id uint) (err error)
-	IsUsernameExist(actor entities.Actor) (exist bool, err error)
-	IsExist(id uint) (exist bool, err error)
 }
 
 func NewUseCase(
@@ -37,14 +37,17 @@ type actorUseCase struct {
 	registerApprovalRepository repositories.RegisterApprovalRepositoryInterface
 }
 
-func (uc actorUseCase) IsExist(id uint) (exist bool, err error) {
-	exist, err = uc.actorRepository.IsExist(id)
-	return
-}
-
-func (uc actorUseCase) IsUsernameExist(actor entities.Actor) (exist bool, err error) {
-	exist, err = uc.actorRepository.IsUsernameExist(actor)
-	return
+func (uc actorUseCase) validateActor(actor entities.Actor, validations ...validateFunc) (error, error) {
+	for _, validation := range validations {
+		validationError, err := validation(actor, uc.actorRepository)
+		if err != nil {
+			return nil, err
+		}
+		if validationError != nil {
+			return validationError, nil
+		}
+	}
+	return nil, nil
 }
 
 func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {
@@ -112,51 +115,24 @@ func (uc actorUseCase) UpdateActor(actor *entities.Actor) (err error) {
 	return
 }
 
-func notFound(queries []string, results []entities.Actor) []string {
-	mapResult := make(map[string]bool)
-	for _, result := range results {
-		mapResult[result.Username] = true
-	}
-	diff := make([]string, 0)
-	for _, query := range queries {
-		if !mapResult[query] {
-			diff = append(diff, query)
-		}
-	}
-	return diff
-}
-
-func (uc actorUseCase) changeActiveActor(usernames []string, value bool) (map[string][]string, error) {
-	actors, err := uc.actorRepository.GetByUsernameBatch(usernames)
-	failed := notFound(usernames, actors)
+func (uc actorUseCase) changeActiveActor(username string, value bool) error {
+	actor, err := uc.actorRepository.GetByUsername(username)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	result := map[string][]string{
-		"success": {},
-		"failed":  failed,
+	if !actor.Verified {
+		return errors.New("actor not verified yet")
 	}
-	for _, actor := range actors {
-		if !actor.Verified {
-			result["failed"] = append(result["failed"], actor.Username)
-			continue
-		}
-		actor.Active = value
-		if err := uc.actorRepository.UpdateOrCreate(&actor); err != nil {
-			result["failed"] = append(result["failed"], actor.Username)
-		} else {
-			result["success"] = append(result["success"], actor.Username)
-		}
-	}
-	return result, nil
+	actor.Active = value
+	return uc.actorRepository.Save(&actor)
 }
 
-func (uc actorUseCase) ActivateActor(usernames []string) (map[string][]string, error) {
-	return uc.changeActiveActor(usernames, true)
+func (uc actorUseCase) ActivateActor(username string) error {
+	return uc.changeActiveActor(username, true)
 }
 
-func (uc actorUseCase) DeactivateActor(usernames []string) (map[string][]string, error) {
-	return uc.changeActiveActor(usernames, false)
+func (uc actorUseCase) DeactivateActor(username string) error {
+	return uc.changeActiveActor(username, false)
 }
 
 func (uc actorUseCase) DeleteActor(id uint) (err error) {

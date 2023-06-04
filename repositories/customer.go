@@ -8,11 +8,12 @@ import (
 
 type CustomerRepositoryInterface interface {
 	GetByID(id uint) (customer entities.Customer, err error)
+	GetAll(limit, offset uint) (customers []entities.Customer, err error)
 	GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error)
 	GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error)
 	Create(customer *entities.Customer) (err error)
 	Update(customer *entities.Customer) (err error)
-	UpdateOrCreate(customer *entities.Customer) (err error)
+	Save(customer *entities.Customer) (err error)
 	Delete(id uint) (err error)
 	IsExist(id uint) (exist bool, err error)
 	IsEmailExist(customer entities.Customer) (bool, error)
@@ -28,8 +29,8 @@ type customerRepository struct {
 
 func (r customerRepository) IsExist(id uint) (exist bool, err error) {
 	var count int64
-	result := r.db.Model(&entities.Customer{}).Where("id = ?", id).Count(&count)
-	if result.Error != nil {
+	err = r.db.Model(&entities.Customer{}).Where("id = ?", id).Count(&count).Error
+	if err != nil {
 		return
 	}
 	exist = count > 0
@@ -44,6 +45,11 @@ func (r customerRepository) IsEmailExist(customer entities.Customer) (exist bool
 		return
 	}
 	exist = count > 0
+	return
+}
+func (r customerRepository) GetAll(limit, offset uint) (customers []entities.Customer, err error) {
+	err = r.db.Model(&entities.Customer{}).Offset(int(offset)).Limit(int(limit)).
+		Find(&customers).Error
 	return
 }
 
@@ -74,7 +80,7 @@ func (r customerRepository) Update(customer *entities.Customer) (err error) {
 	return
 }
 
-func (r customerRepository) UpdateOrCreate(customer *entities.Customer) (err error) {
+func (r customerRepository) Save(customer *entities.Customer) (err error) {
 	customer.CreatedAt = time.Now()
 	err = r.db.Save(customer).Error
 	return
