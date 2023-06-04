@@ -73,33 +73,20 @@ func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 	for _, customer := range customers {
 		result = append(result, mapCustomerToResponse(customer))
 	}
-	return dto.BaseResponse{
-		Code:    http.StatusOK,
-		Message: "Success retrieve customers",
-		Data:    result,
-	}, nil
+	return dto.Success("Success retrieve customers", customers), nil
 }
 
 func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) {
 	customer := mapCreateRequestToCustomer(req)
 	exist, err := c.customerUseCase.IsEmailExist(customer)
 	if err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create customer",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	if exist {
-		return dto.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Email already exist",
-		}, nil
+		return dto.ErrorBadRequest("Email already exist"), nil
 	}
 	if err := c.customerUseCase.CreateCustomer(&customer); err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create customer",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	response := mapCustomerToResponse(customer)
 	return dto.Created("Success create customer", response), nil
@@ -110,22 +97,13 @@ func (c controller) UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.Base
 	customer.ID = id
 	exist, err := c.customerUseCase.IsEmailExist(customer)
 	if err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't create customer",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	if exist {
-		return dto.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Email already exist",
-		}, nil
+		return dto.ErrorBadRequest("Email already exist"), nil
 	}
 	if err := c.customerUseCase.UpdateOrCreateCustomer(&customer); err != nil {
-		return dto.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Can't update customer",
-		}, err
+		return dto.ErrorInternalServerError(), err
 	}
 	response := mapCustomerToResponse(customer)
 	return dto.Success("Success update customer", response), nil
