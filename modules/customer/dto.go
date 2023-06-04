@@ -20,3 +20,7 @@ type PaginationRequest struct {
 	Email   string `form:"email"`
 	Name    string `form:"name"`
 }
+
+type ThirdPartyJSON struct {
+	Data []CreateRequest `json:"data"`
+}

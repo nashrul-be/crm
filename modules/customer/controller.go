@@ -1,7 +1,10 @@
 package customer
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"nashrul-be/crm/dto"
 	"nashrul-be/crm/entities"
 	"net/http"
@@ -37,6 +40,23 @@ func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 	var customers []entities.Customer
 	var err error
+	response, err := http.Get("https://reqres.in/api/users?page=2")
+	log.Println(err)
+	if err == nil {
+		var jsonResponse ThirdPartyJSON
+		body, err := io.ReadAll(response.Body)
+		defer response.Body.Close()
+		log.Println(err)
+		if err == nil {
+			err = json.Unmarshal(body, &jsonResponse)
+			log.Println(err)
+			if err == nil {
+				for _, customer := range jsonResponse.Data {
+					c.CreateCustomer(customer)
+				}
+			}
+		}
+	}
 	offset := (req.Page - 1) * req.PerPage
 	switch {
 	case req.Email != "":
