@@ -12,7 +12,7 @@ type RequestHandlerInterface interface {
 	GetByID(c *gin.Context)
 	GetAll(c *gin.Context)
 	CreateCustomer(c *gin.Context)
-	UpdateOrCreateCustomer(c *gin.Context)
+	UpdateCustomer(c *gin.Context)
 	DeleteCustomer(c *gin.Context)
 }
 
@@ -67,7 +67,7 @@ func (h customerRequestHandler) CreateCustomer(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h customerRequestHandler) UpdateOrCreateCustomer(c *gin.Context) {
+func (h customerRequestHandler) UpdateCustomer(c *gin.Context) {
 	var request CreateRequest
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
@@ -80,7 +80,7 @@ func (h customerRequestHandler) UpdateOrCreateCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	response, err := h.customerController.UpdateOrCreateCustomer(uint(id), request)
+	response, err := h.customerController.UpdateCustomer(uint(id), request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return

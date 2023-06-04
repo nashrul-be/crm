@@ -8,6 +8,7 @@ import (
 )
 
 type UseCaseInterface interface {
+	validateActor(actor entities.Actor, validations ...validateFunc) (error, error)
 	GetByID(id uint) (actor entities.Actor, err error)
 	GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error)
 	GetByUsername(username string) (actor entities.Actor, err error)
@@ -16,8 +17,6 @@ type UseCaseInterface interface {
 	DeactivateActor(usernames string) error
 	UpdateActor(actor *entities.Actor) (err error)
 	DeleteActor(id uint) (err error)
-	IsUsernameExist(actor entities.Actor) (exist bool, err error)
-	IsExist(id uint) (exist bool, err error)
 }
 
 func NewUseCase(
@@ -38,14 +37,17 @@ type actorUseCase struct {
 	registerApprovalRepository repositories.RegisterApprovalRepositoryInterface
 }
 
-func (uc actorUseCase) IsExist(id uint) (exist bool, err error) {
-	exist, err = uc.actorRepository.IsExist(id)
-	return
-}
-
-func (uc actorUseCase) IsUsernameExist(actor entities.Actor) (exist bool, err error) {
-	exist, err = uc.actorRepository.IsUsernameExist(actor)
-	return
+func (uc actorUseCase) validateActor(actor entities.Actor, validations ...validateFunc) (error, error) {
+	for _, validation := range validations {
+		validationError, err := validation(actor, uc.actorRepository)
+		if err != nil {
+			return nil, err
+		}
+		if validationError != nil {
+			return validationError, nil
+		}
+	}
+	return nil, nil
 }
 
 func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {

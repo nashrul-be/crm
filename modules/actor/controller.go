@@ -48,12 +48,12 @@ func (c controller) GetAllByUsername(req PaginationRequest) (dto.BaseResponse, e
 
 func (c controller) CreateActor(req CreateRequest) (dto.BaseResponse, error) {
 	actor := mapCreateRequestToActor(req)
-	exist, err := c.actorUseCase.IsUsernameExist(actor)
+	validationErr, err := c.actorUseCase.validateActor(actor, validateUsername)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	if exist {
-		return dto.ErrorBadRequest("Username already exist"), nil
+	if validationErr != nil {
+		return dto.ErrorBadRequest(validationErr.Error()), nil
 	}
 	if err := c.actorUseCase.CreateActor(&actor); err != nil {
 		return dto.ErrorInternalServerError(), err
@@ -86,21 +86,12 @@ func (c controller) ChangeActiveActor(request ChangeActiveRequest) (dto.BaseResp
 
 func (c controller) UpdateActor(req UpdateRequest) (dto.BaseResponse, error) {
 	actor := mapUpdateRequestToActor(req)
-	exist, err := c.actorUseCase.IsExist(actor.ID)
+	validationErr, err := c.actorUseCase.validateActor(actor, validateId, validateUsername)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	if !exist {
-		return dto.ErrorNotFound("Actor not found"), nil
-	}
-	if actor.Username != "" {
-		exist, err := c.actorUseCase.IsUsernameExist(actor)
-		if err != nil {
-			return dto.ErrorInternalServerError(), err
-		}
-		if exist {
-			return dto.ErrorBadRequest("Username already exist"), nil
-		}
+	if validationErr != nil {
+		return dto.ErrorBadRequest(validationErr.Error()), nil
 	}
 	if err := c.actorUseCase.UpdateActor(&actor); err != nil {
 		return dto.ErrorInternalServerError(), err

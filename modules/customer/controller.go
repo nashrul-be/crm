@@ -14,7 +14,7 @@ type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
 	CreateCustomer(req CreateRequest) (dto.BaseResponse, error)
 	GetAll(req PaginationRequest) (dto.BaseResponse, error)
-	UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error)
+	UpdateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error)
 	DeleteCustomer(id uint) error
 }
 
@@ -41,7 +41,6 @@ func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 	var customers []entities.Customer
 	var err error
 	response, err := http.Get("https://reqres.in/api/users?page=2")
-	log.Println(err)
 	if err == nil {
 		var jsonResponse ThirdPartyJSON
 		body, err := io.ReadAll(response.Body)
@@ -64,7 +63,7 @@ func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 	case req.Name != "":
 		customers, err = c.customerUseCase.GetAllByName(req.Name+"%", req.PerPage, offset)
 	default:
-		customers, err = c.customerUseCase.GetAllByEmail("%", req.PerPage, offset)
+		customers, err = c.customerUseCase.GetAll(req.PerPage, offset)
 	}
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
@@ -78,12 +77,12 @@ func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 
 func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) {
 	customer := mapCreateRequestToCustomer(req)
-	exist, err := c.customerUseCase.IsEmailExist(customer)
+	validationError, err := c.customerUseCase.ValidateCustomer(customer, validateEmail)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	if exist {
-		return dto.ErrorBadRequest("Email already exist"), nil
+	if validationError != nil {
+		return dto.ErrorBadRequest(validationError.Error()), nil
 	}
 	if err := c.customerUseCase.CreateCustomer(&customer); err != nil {
 		return dto.ErrorInternalServerError(), err
@@ -92,17 +91,17 @@ func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) 
 	return dto.Created("Success create customer", response), nil
 }
 
-func (c controller) UpdateOrCreateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error) {
+func (c controller) UpdateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error) {
 	customer := mapCreateRequestToCustomer(req)
 	customer.ID = id
-	exist, err := c.customerUseCase.IsEmailExist(customer)
+	validationError, err := c.customerUseCase.ValidateCustomer(customer, validateId, validateEmail)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	if exist {
-		return dto.ErrorBadRequest("Email already exist"), nil
+	if validationError != nil {
+		return dto.ErrorBadRequest(validationError.Error()), nil
 	}
-	if err := c.customerUseCase.UpdateOrCreateCustomer(&customer); err != nil {
+	if err := c.customerUseCase.UpdateCustomer(&customer); err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
 	response := mapCustomerToResponse(customer)
