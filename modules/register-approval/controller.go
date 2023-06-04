@@ -9,7 +9,7 @@ type ControllerInterface interface {
 	Approve(request ApproveRequest) (dto.BaseResponse, error)
 }
 
-func NewRegisterController(approvalUseCase RegisterApprovalUseCaseInterface) ControllerInterface {
+func NewController(approvalUseCase RegisterApprovalUseCaseInterface) ControllerInterface {
 	return controller{approvalUseCase: approvalUseCase}
 }
 

@@ -28,17 +28,17 @@ func main() {
 	roleRepo := repositories.NewRoleRepository(dbConn)
 	approvalRepo := repositories.NewRegisterApprovalRepository(dbConn)
 
-	userRoute := customer.NewCustomerRoute(userRepo)
+	userRoute := customer.NewRoute(userRepo)
 	userRoute.Handle(engine)
 
-	actorRoute := actor.NewActorRoute(actorRepo, roleRepo, approvalRepo)
+	actorRoute := actor.NewRoute(actorRepo, roleRepo, approvalRepo)
 	actorRoute.Handle(engine)
 
-	approveRoute := register_approval.NewApprovalRoute(actorRepo, approvalRepo)
+	approveRoute := register_approval.NewRoute(actorRepo, approvalRepo)
 	approveRoute.Handle(engine)
 
 	actorUseCase := actor.NewUseCase(actorRepo, roleRepo, approvalRepo)
-	authRoute := authentication.NewAuthRoute(actorUseCase)
+	authRoute := authentication.NewRoute(actorUseCase)
 	authRoute.Handle(engine)
 
 	if err := engine.Run(); err != nil {

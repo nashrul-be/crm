@@ -17,14 +17,14 @@ type RequestHandlerInterface interface {
 }
 
 func NewRequestHandler(controllerInterface ControllerInterface) RequestHandlerInterface {
-	return customerRequestHandler{customerController: controllerInterface}
+	return requestHandler{customerController: controllerInterface}
 }
 
-type customerRequestHandler struct {
+type requestHandler struct {
 	customerController ControllerInterface
 }
 
-func (h customerRequestHandler) GetByID(c *gin.Context) {
+func (h requestHandler) GetByID(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
@@ -39,7 +39,7 @@ func (h customerRequestHandler) GetByID(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h customerRequestHandler) GetAll(c *gin.Context) {
+func (h requestHandler) GetAll(c *gin.Context) {
 	var request PaginationRequest
 	if err := c.BindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
@@ -53,7 +53,7 @@ func (h customerRequestHandler) GetAll(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h customerRequestHandler) CreateCustomer(c *gin.Context) {
+func (h requestHandler) CreateCustomer(c *gin.Context) {
 	var request CreateRequest
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
@@ -67,7 +67,7 @@ func (h customerRequestHandler) CreateCustomer(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h customerRequestHandler) UpdateCustomer(c *gin.Context) {
+func (h requestHandler) UpdateCustomer(c *gin.Context) {
 	var request CreateRequest
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
@@ -88,7 +88,7 @@ func (h customerRequestHandler) UpdateCustomer(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h customerRequestHandler) DeleteCustomer(c *gin.Context) {
+func (h requestHandler) DeleteCustomer(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {

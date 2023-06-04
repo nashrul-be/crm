@@ -26,7 +26,7 @@ type Representation struct {
 }
 
 type PaginationRequest struct {
-	PerPage  uint   `json:"per_page" binding:"gt=0"`
-	Page     uint   `json:"page" binding:"gt=0"`
-	Username string `json:"username"`
+	PerPage  uint   `form:"perpage" binding:"numeric,gt=0"`
+	Page     uint   `form:"page" binding:"numeric,gt=0"`
+	Username string `form:"username"`
 }

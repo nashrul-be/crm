@@ -18,14 +18,14 @@ type RequestHandlerInterface interface {
 }
 
 func NewRequestHandler(controllerInterface ControllerInterface) RequestHandlerInterface {
-	return actorRequestHandler{actorController: controllerInterface}
+	return requestHandler{actorController: controllerInterface}
 }
 
-type actorRequestHandler struct {
+type requestHandler struct {
 	actorController ControllerInterface
 }
 
-func (h actorRequestHandler) GetByID(c *gin.Context) {
+func (h requestHandler) GetByID(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
@@ -40,7 +40,8 @@ func (h actorRequestHandler) GetByID(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) GetAllByUsername(c *gin.Context) {
+func (h requestHandler) GetAllByUsername(c *gin.Context) {
+	//TODO: bind to struct
 	perPage, _ := strconv.Atoi(c.Query("perpage"))
 	page, _ := strconv.Atoi(c.Query("page"))
 	username := c.Query("username")
@@ -61,7 +62,7 @@ func (h actorRequestHandler) GetAllByUsername(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) CreateActor(c *gin.Context) {
+func (h requestHandler) CreateActor(c *gin.Context) {
 	var request CreateRequest
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
@@ -75,7 +76,7 @@ func (h actorRequestHandler) CreateActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) ChangeActiveActor(c *gin.Context) {
+func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 	var request ChangeActiveRequest
 	if err := c.Bind(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
@@ -89,7 +90,7 @@ func (h actorRequestHandler) ChangeActiveActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) UpdateActor(c *gin.Context) {
+func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
@@ -111,7 +112,7 @@ func (h actorRequestHandler) UpdateActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) DeleteActor(c *gin.Context) {
+func (h requestHandler) DeleteActor(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {

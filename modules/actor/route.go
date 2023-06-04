@@ -6,21 +6,21 @@ import (
 	"nashrul-be/crm/repositories"
 )
 
-type ActorRoute struct {
+type Route struct {
 	actorRequestHandler RequestHandlerInterface
 }
 
-func NewActorRoute(actorRepository repositories.ActorRepositoryInterface,
+func NewRoute(actorRepository repositories.ActorRepositoryInterface,
 	roleRepository repositories.RoleRepositoryInterface,
 	approvalRepository repositories.RegisterApprovalRepositoryInterface,
-) ActorRoute {
+) Route {
 	useCase := NewUseCase(actorRepository, roleRepository, approvalRepository)
 	actorController := NewController(useCase)
 	requestHandler := NewRequestHandler(actorController)
-	return ActorRoute{actorRequestHandler: requestHandler}
+	return Route{actorRequestHandler: requestHandler}
 }
 
-func (r ActorRoute) Handle(router *gin.Engine) {
+func (r Route) Handle(router *gin.Engine) {
 	actor := router.Group("/actors", middleware.Authenticate())
 	actor.GET("/:id", r.actorRequestHandler.GetByID)
 	actor.GET("", r.actorRequestHandler.GetAllByUsername)

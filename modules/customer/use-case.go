@@ -18,14 +18,14 @@ type UseCaseInterface interface {
 }
 
 func NewUseCase(repositoryInterface repositories.CustomerRepositoryInterface) UseCaseInterface {
-	return customerUseCase{customerRepository: repositoryInterface}
+	return useCase{customerRepository: repositoryInterface}
 }
 
-type customerUseCase struct {
+type useCase struct {
 	customerRepository repositories.CustomerRepositoryInterface
 }
 
-func (uc customerUseCase) ValidateCustomer(customer entities.Customer, validations ...validateFunc) (error, error) {
+func (uc useCase) ValidateCustomer(customer entities.Customer, validations ...validateFunc) (error, error) {
 	for _, validation := range validations {
 		validationError, err := validation(customer, uc.customerRepository)
 		if err != nil {
@@ -38,27 +38,27 @@ func (uc customerUseCase) ValidateCustomer(customer entities.Customer, validatio
 	return nil, nil
 }
 
-func (uc customerUseCase) GetByID(id uint) (customer entities.Customer, err error) {
+func (uc useCase) GetByID(id uint) (customer entities.Customer, err error) {
 	return uc.customerRepository.GetByID(id)
 }
 
-func (uc customerUseCase) GetAll(limit, offset uint) (customers []entities.Customer, err error) {
+func (uc useCase) GetAll(limit, offset uint) (customers []entities.Customer, err error) {
 	return uc.customerRepository.GetAll(limit, offset)
 }
 
-func (uc customerUseCase) GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error) {
+func (uc useCase) GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error) {
 	return uc.customerRepository.GetAllByEmail(email, limit, offset)
 }
 
-func (uc customerUseCase) GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error) {
+func (uc useCase) GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error) {
 	return uc.customerRepository.GetAllByName(name, limit, offset)
 }
 
-func (uc customerUseCase) CreateCustomer(customer *entities.Customer) (err error) {
+func (uc useCase) CreateCustomer(customer *entities.Customer) (err error) {
 	return uc.customerRepository.Create(customer)
 }
 
-func (uc customerUseCase) UpdateCustomer(customer *entities.Customer) (err error) {
+func (uc useCase) UpdateCustomer(customer *entities.Customer) (err error) {
 	exist, err := uc.customerRepository.IsExist(customer.ID)
 	if err != nil {
 		return
@@ -70,7 +70,7 @@ func (uc customerUseCase) UpdateCustomer(customer *entities.Customer) (err error
 	return
 }
 
-func (uc customerUseCase) DeleteCustomer(id uint) (err error) {
+func (uc useCase) DeleteCustomer(id uint) (err error) {
 	err = uc.customerRepository.Delete(id)
 	return
 }
