@@ -1,7 +1,6 @@
 package customer
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/dto"
 	"net/http"
@@ -28,12 +27,12 @@ func (h requestHandler) GetByID(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Customer %d not found", id)))
+		c.JSON(http.StatusNotFound, customerNotFound())
 		return
 	}
 	response, err := h.customerController.GetByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Customer %d not found", id)))
+		c.JSON(http.StatusNotFound, customerNotFound())
 		return
 	}
 	c.JSON(response.Code, response)
@@ -42,8 +41,7 @@ func (h requestHandler) GetByID(c *gin.Context) {
 func (h requestHandler) GetAll(c *gin.Context) {
 	var request PaginationRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
-		return
+		request = PaginationRequest{Page: 1, PerPage: 10}
 	}
 	response, err := h.customerController.GetAll(request)
 	if err != nil {
@@ -56,7 +54,7 @@ func (h requestHandler) GetAll(c *gin.Context) {
 func (h requestHandler) CreateCustomer(c *gin.Context) {
 	var request CreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.customerController.CreateCustomer(request)
@@ -70,11 +68,11 @@ func (h requestHandler) CreateCustomer(c *gin.Context) {
 func (h requestHandler) UpdateCustomer(c *gin.Context) {
 	var request UpdateRequest
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusNotFound, customerNotFound())
 		return
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.customerController.UpdateCustomer(request)

@@ -25,7 +25,7 @@ func validateId(customer entities.Customer, customerRepo repositories.CustomerRe
 		return nil, err
 	}
 	if !exist {
-		return errors.New("customer ID doesn't exist"), nil
+		return errors.New("customer doesn't exist"), nil
 	}
 	return nil, nil
 }

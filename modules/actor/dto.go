@@ -1,6 +1,12 @@
 package actor
 
+import "nashrul-be/crm/dto"
+
 //TODO: create custom binding rule for username and password
+
+func actorNotFound() dto.BaseResponse {
+	return dto.ErrorNotFound("Actor")
+}
 
 type CreateRequest struct {
 	Username string `json:"username" binding:"required,printascii"`

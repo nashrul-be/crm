@@ -25,7 +25,7 @@ func validateId(actor entities.Actor, actorRepo repositories.ActorRepositoryInte
 		return nil, err
 	}
 	if !exist {
-		return errors.New("actor ID doesn't exist"), nil
+		return errors.New("actor doesn't exist"), nil
 	}
 	return nil, nil
 }

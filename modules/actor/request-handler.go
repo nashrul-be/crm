@@ -1,7 +1,6 @@
 package actor
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/dto"
 	"net/http"
@@ -29,12 +28,12 @@ func (h requestHandler) GetByID(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Actor %d not found", id)))
+		c.JSON(http.StatusNotFound, actorNotFound())
 		return
 	}
 	response, err := h.actorController.GetByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Actor %d not found", id)))
+		c.JSON(http.StatusNotFound, actorNotFound())
 		return
 	}
 	c.JSON(response.Code, response)
@@ -43,8 +42,7 @@ func (h requestHandler) GetByID(c *gin.Context) {
 func (h requestHandler) GetAllByUsername(c *gin.Context) {
 	var request PaginationRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
-		return
+		request = PaginationRequest{Page: 1, PerPage: 10}
 	}
 	response, err := h.actorController.GetAllByUsername(request)
 	if err != nil {
@@ -57,7 +55,7 @@ func (h requestHandler) GetAllByUsername(c *gin.Context) {
 func (h requestHandler) CreateActor(c *gin.Context) {
 	var request CreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.actorController.CreateActor(request)
@@ -71,7 +69,7 @@ func (h requestHandler) CreateActor(c *gin.Context) {
 func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 	var request ChangeActiveRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.actorController.ChangeActiveActor(request)
@@ -85,11 +83,11 @@ func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, actorNotFound())
 		return
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.actorController.UpdateActor(request)
@@ -104,7 +102,7 @@ func (h requestHandler) DeleteActor(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, actorNotFound())
 		return
 	}
 	if err := h.actorController.DeleteActor(uint(id)); err != nil {

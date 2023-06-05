@@ -1,5 +1,11 @@
 package customer
 
+import "nashrul-be/crm/dto"
+
+func customerNotFound() dto.BaseResponse {
+	return dto.ErrorNotFound("customer")
+}
+
 type CreateRequest struct {
 	FirstName string `binding:"required,alpha" json:"first_name"`
 	LastName  string `binding:"required,alpha" json:"last_name"`
@@ -12,7 +18,7 @@ type UpdateRequest struct {
 	FirstName string `binding:"omitempty,alpha" json:"first_name"`
 	LastName  string `binding:"omitempty,alpha" json:"last_name"`
 	Email     string `binding:"omitempty,email" json:"email"`
-	Avatar    string `json:"avatar"`
+	Avatar    string `binding:"omitempty,uri" json:"avatar"`
 }
 
 type Representation struct {
@@ -25,8 +31,8 @@ type Representation struct {
 type PaginationRequest struct {
 	PerPage uint   `form:"perpage" binding:"required,numeric,gt=0"`
 	Page    uint   `form:"page" binding:"required,numeric,gt=0"`
-	Email   string `form:"email"`
-	Name    string `form:"name"`
+	Email   string `form:"email" json:"email,omitempty"`
+	Name    string `form:"name" json:"name,omitempty"`
 }
 
 type ThirdPartyJSON struct {

@@ -2,9 +2,7 @@ package customer
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"nashrul-be/crm/dto"
 	"nashrul-be/crm/entities"
 	"net/http"
@@ -31,7 +29,7 @@ type controller struct {
 func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 	customer, err := c.customerUseCase.GetByID(id)
 	if err != nil {
-		return dto.ErrorNotFound(fmt.Sprintf("Customer %d doesn't exist", id)), err
+		return customerNotFound(), err
 	}
 	customerRepresentation := mapCustomerToResponse(customer)
 	return dto.Success("Success retrieve data", customerRepresentation), nil
@@ -45,10 +43,8 @@ func (c controller) GetAll(req PaginationRequest) (dto.BaseResponse, error) {
 		var jsonResponse ThirdPartyJSON
 		body, err := io.ReadAll(response.Body)
 		defer response.Body.Close()
-		log.Println(err)
 		if err == nil {
 			err = json.Unmarshal(body, &jsonResponse)
-			log.Println(err)
 			if err == nil {
 				for _, customer := range jsonResponse.Data {
 					c.CreateCustomer(customer)
