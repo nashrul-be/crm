@@ -1,6 +1,12 @@
 package actor
 
+import "nashrul-be/crm/dto"
+
 //TODO: create custom binding rule for username and password
+
+func actorNotFound() dto.BaseResponse {
+	return dto.ErrorNotFound("Actor")
+}
 
 type CreateRequest struct {
 	Username string `json:"username" binding:"required,printascii"`
@@ -8,9 +14,9 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-	ID       uint
-	Username string `json:"username" binding:"printascii"`
-	Password string `json:"password" binding:"printascii"`
+	ID       uint   `uri:"id" binding:"required,numeric"`
+	Username string `json:"username" binding:"omitempty,printascii"`
+	Password string `json:"password" binding:"omitempty,printascii"`
 }
 
 type ChangeActiveRequest struct {
@@ -26,7 +32,7 @@ type Representation struct {
 }
 
 type PaginationRequest struct {
-	PerPage  uint   `json:"per_page" binding:"gt=0"`
-	Page     uint   `json:"page" binding:"gt=0"`
-	Username string `json:"username"`
+	PerPage  uint   `form:"perpage" binding:"numeric,gt=0"`
+	Page     uint   `form:"page" binding:"numeric,gt=0"`
+	Username string `form:"username"`
 }

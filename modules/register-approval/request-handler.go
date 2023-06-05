@@ -12,14 +12,14 @@ type RequestHandlerInterface interface {
 }
 
 func NewRequestHandler(approvalController ControllerInterface) RequestHandlerInterface {
-	return approvalRequestHandler{approvalController: approvalController}
+	return requestHandler{approvalController: approvalController}
 }
 
-type approvalRequestHandler struct {
+type requestHandler struct {
 	approvalController ControllerInterface
 }
 
-func (h approvalRequestHandler) GetAllPendingApproval(c *gin.Context) {
+func (h requestHandler) GetAllPendingApproval(c *gin.Context) {
 	response, err := h.approvalController.GetAllPendingApproval()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
@@ -28,11 +28,10 @@ func (h approvalRequestHandler) GetAllPendingApproval(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h approvalRequestHandler) Approve(c *gin.Context) {
+func (h requestHandler) Approve(c *gin.Context) {
 	var request ApproveRequest
-	err := c.BindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.approvalController.Approve(request)

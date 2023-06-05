@@ -5,18 +5,18 @@ import (
 	"nashrul-be/crm/modules/actor"
 )
 
-type AuthRoute struct {
+type Route struct {
 	authRequestHandler RequestHandlerInterface
 }
 
-func NewAuthRoute(actorUseCase actor.UseCaseInterface) AuthRoute {
+func NewRoute(actorUseCase actor.UseCaseInterface) Route {
 	controller := NewAuthController(actorUseCase)
 	requestHandler := NewRequestHandler(controller)
-	return AuthRoute{
+	return Route{
 		authRequestHandler: requestHandler,
 	}
 }
 
-func (r AuthRoute) Handle(router *gin.Engine) {
+func (r Route) Handle(router *gin.Engine) {
 	router.POST("/login", r.authRequestHandler.Login)
 }

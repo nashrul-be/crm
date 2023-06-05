@@ -1,7 +1,6 @@
 package actor
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/dto"
 	"net/http"
@@ -18,40 +17,32 @@ type RequestHandlerInterface interface {
 }
 
 func NewRequestHandler(controllerInterface ControllerInterface) RequestHandlerInterface {
-	return actorRequestHandler{actorController: controllerInterface}
+	return requestHandler{actorController: controllerInterface}
 }
 
-type actorRequestHandler struct {
+type requestHandler struct {
 	actorController ControllerInterface
 }
 
-func (h actorRequestHandler) GetByID(c *gin.Context) {
+func (h requestHandler) GetByID(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Actor %d not found", id)))
+		c.JSON(http.StatusNotFound, actorNotFound())
 		return
 	}
 	response, err := h.actorController.GetByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorNotFound(fmt.Sprintf("Actor %d not found", id)))
+		c.JSON(http.StatusNotFound, actorNotFound())
 		return
 	}
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) GetAllByUsername(c *gin.Context) {
-	perPage, _ := strconv.Atoi(c.Query("perpage"))
-	page, _ := strconv.Atoi(c.Query("page"))
-	username := c.Query("username")
-	if perPage < 1 || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest("perPage or page must be more than zero"))
-		return
-	}
-	request := PaginationRequest{
-		PerPage:  uint(perPage),
-		Page:     uint(page),
-		Username: username,
+func (h requestHandler) GetAllByUsername(c *gin.Context) {
+	var request PaginationRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		request = PaginationRequest{Page: 1, PerPage: 10}
 	}
 	response, err := h.actorController.GetAllByUsername(request)
 	if err != nil {
@@ -61,10 +52,10 @@ func (h actorRequestHandler) GetAllByUsername(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) CreateActor(c *gin.Context) {
+func (h requestHandler) CreateActor(c *gin.Context) {
 	var request CreateRequest
-	if err := c.BindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.actorController.CreateActor(request)
@@ -75,10 +66,10 @@ func (h actorRequestHandler) CreateActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) ChangeActiveActor(c *gin.Context) {
+func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 	var request ChangeActiveRequest
-	if err := c.Bind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
 	response, err := h.actorController.ChangeActiveActor(request)
@@ -89,20 +80,16 @@ func (h actorRequestHandler) ChangeActiveActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) UpdateActor(c *gin.Context) {
+func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
-	uriParam := c.Param("id")
-	id, err := strconv.Atoi(uriParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, actorNotFound())
 		return
 	}
-	err = c.BindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
-	request.ID = uint(id)
 	response, err := h.actorController.UpdateActor(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
@@ -111,15 +98,14 @@ func (h actorRequestHandler) UpdateActor(c *gin.Context) {
 	c.JSON(response.Code, response)
 }
 
-func (h actorRequestHandler) DeleteActor(c *gin.Context) {
+func (h requestHandler) DeleteActor(c *gin.Context) {
 	uriParam := c.Param("id")
 	id, err := strconv.Atoi(uriParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
+		c.JSON(http.StatusBadRequest, actorNotFound())
 		return
 	}
-	err = h.actorController.DeleteActor(uint(id))
-	if err != nil {
+	if err := h.actorController.DeleteActor(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 	}
 	c.JSON(http.StatusNoContent, nil)

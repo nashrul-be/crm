@@ -11,16 +11,16 @@ type RequestHandlerInterface interface {
 }
 
 func NewRequestHandler(authController ControllerInterface) RequestHandlerInterface {
-	return authRequestHandler{authController: authController}
+	return requestHandler{authController: authController}
 }
 
-type authRequestHandler struct {
+type requestHandler struct {
 	authController ControllerInterface
 }
 
-func (h authRequestHandler) Login(c *gin.Context) {
+func (h requestHandler) Login(c *gin.Context) {
 	var request LoginRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest("Invalid Username/Password"))
 		return
 	}

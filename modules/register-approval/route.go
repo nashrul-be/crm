@@ -6,19 +6,19 @@ import (
 	"nashrul-be/crm/repositories"
 )
 
-type ApprovalRoute struct {
+type Route struct {
 	approvalRequestHandler RequestHandlerInterface
 }
 
-func NewApprovalRoute(actorRepository repositories.ActorRepositoryInterface,
-	approvalRepository repositories.RegisterApprovalRepositoryInterface) ApprovalRoute {
+func NewRoute(actorRepository repositories.ActorRepositoryInterface,
+	approvalRepository repositories.RegisterApprovalRepositoryInterface) Route {
 	approvalUseCase := NewRegisterApprovalUseCase(approvalRepository, actorRepository)
-	approvalController := NewRegisterController(approvalUseCase)
+	approvalController := NewController(approvalUseCase)
 	approvalRequestHandler := NewRequestHandler(approvalController)
-	return ApprovalRoute{approvalRequestHandler: approvalRequestHandler}
+	return Route{approvalRequestHandler: approvalRequestHandler}
 }
 
-func (r ApprovalRoute) Handle(router *gin.Engine) {
+func (r Route) Handle(router *gin.Engine) {
 	group := router.Group("/actors", middleware.Authenticate(), middleware.AuthorizationWithRole([]string{"super_admin"}))
 	group.GET("/approve", r.approvalRequestHandler.GetAllPendingApproval)
 	group.PUT("/approve", r.approvalRequestHandler.Approve)

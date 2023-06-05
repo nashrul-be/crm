@@ -1,7 +1,6 @@
 package actor
 
 import (
-	"fmt"
 	"nashrul-be/crm/dto"
 )
 
@@ -27,7 +26,7 @@ type controller struct {
 func (c controller) GetByID(id uint) (dto.BaseResponse, error) {
 	actor, err := c.actorUseCase.GetByID(id)
 	if err != nil {
-		return dto.ErrorNotFound(fmt.Sprintf("Actor %d doesn't exist", id)), err
+		return actorNotFound(), err
 	}
 	actorRepresentation := mapActorToResponse(actor)
 	return dto.Success("Success retrieve data", actorRepresentation), nil

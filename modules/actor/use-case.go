@@ -24,20 +24,20 @@ func NewUseCase(
 	roleRepositoryInterface repositories.RoleRepositoryInterface,
 	registerApprovalRepositoryInterface repositories.RegisterApprovalRepositoryInterface,
 ) UseCaseInterface {
-	return actorUseCase{
+	return useCase{
 		actorRepository:            repositoryInterface,
 		roleRepository:             roleRepositoryInterface,
 		registerApprovalRepository: registerApprovalRepositoryInterface,
 	}
 }
 
-type actorUseCase struct {
+type useCase struct {
 	actorRepository            repositories.ActorRepositoryInterface
 	roleRepository             repositories.RoleRepositoryInterface
 	registerApprovalRepository repositories.RegisterApprovalRepositoryInterface
 }
 
-func (uc actorUseCase) validateActor(actor entities.Actor, validations ...validateFunc) (error, error) {
+func (uc useCase) validateActor(actor entities.Actor, validations ...validateFunc) (error, error) {
 	for _, validation := range validations {
 		validationError, err := validation(actor, uc.actorRepository)
 		if err != nil {
@@ -50,7 +50,7 @@ func (uc actorUseCase) validateActor(actor entities.Actor, validations ...valida
 	return nil, nil
 }
 
-func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {
+func (uc useCase) GetByID(id uint) (actor entities.Actor, err error) {
 	actor, err = uc.actorRepository.GetByID(id)
 	if err != nil {
 		return
@@ -60,7 +60,7 @@ func (uc actorUseCase) GetByID(id uint) (actor entities.Actor, err error) {
 	return
 }
 
-func (uc actorUseCase) GetByUsername(username string) (actor entities.Actor, err error) {
+func (uc useCase) GetByUsername(username string) (actor entities.Actor, err error) {
 	actor, err = uc.actorRepository.GetByUsername(username)
 	if err != nil {
 		return
@@ -70,12 +70,12 @@ func (uc actorUseCase) GetByUsername(username string) (actor entities.Actor, err
 	return
 }
 
-func (uc actorUseCase) GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error) {
+func (uc useCase) GetAllByUsername(username string, limit, offset uint) ([]entities.Actor, error) {
 	actors, err := uc.actorRepository.GetAllByUsername(username, limit, offset)
 	return actors, err
 }
 
-func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {
+func (uc useCase) CreateActor(actor *entities.Actor) (err error) {
 	actor.Password, err = hash.Hash(actor.Password)
 	if err != nil {
 		return
@@ -100,7 +100,7 @@ func (uc actorUseCase) CreateActor(actor *entities.Actor) (err error) {
 	return
 }
 
-func (uc actorUseCase) UpdateActor(actor *entities.Actor) (err error) {
+func (uc useCase) UpdateActor(actor *entities.Actor) (err error) {
 	if actor.Password != "" {
 		actor.Password, err = hash.Hash(actor.Password)
 		if err != nil {
@@ -115,7 +115,7 @@ func (uc actorUseCase) UpdateActor(actor *entities.Actor) (err error) {
 	return
 }
 
-func (uc actorUseCase) changeActiveActor(username string, value bool) error {
+func (uc useCase) changeActiveActor(username string, value bool) error {
 	actor, err := uc.actorRepository.GetByUsername(username)
 	if err != nil {
 		return err
@@ -127,15 +127,15 @@ func (uc actorUseCase) changeActiveActor(username string, value bool) error {
 	return uc.actorRepository.Save(&actor)
 }
 
-func (uc actorUseCase) ActivateActor(username string) error {
+func (uc useCase) ActivateActor(username string) error {
 	return uc.changeActiveActor(username, true)
 }
 
-func (uc actorUseCase) DeactivateActor(username string) error {
+func (uc useCase) DeactivateActor(username string) error {
 	return uc.changeActiveActor(username, false)
 }
 
-func (uc actorUseCase) DeleteActor(id uint) (err error) {
+func (uc useCase) DeleteActor(id uint) (err error) {
 	err = uc.actorRepository.Delete(id)
 	return
 }

@@ -13,14 +13,14 @@ type ControllerInterface interface {
 }
 
 func NewAuthController(actorUseCase actor.UseCaseInterface) ControllerInterface {
-	return authController{actorUseCase: actorUseCase}
+	return controller{actorUseCase: actorUseCase}
 }
 
-type authController struct {
+type controller struct {
 	actorUseCase actor.UseCaseInterface
 }
 
-func (c authController) Login(request LoginRequest) (dto.BaseResponse, error) {
+func (c controller) Login(request LoginRequest) (dto.BaseResponse, error) {
 	account, err := c.actorUseCase.GetByUsername(request.Username)
 	defaultResponse := dto.ErrorUnauthorized("Wrong Username/Password")
 	if err != nil {
