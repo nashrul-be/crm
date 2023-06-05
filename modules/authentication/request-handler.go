@@ -20,7 +20,7 @@ type requestHandler struct {
 
 func (h requestHandler) Login(c *gin.Context) {
 	var request LoginRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest("Invalid Username/Password"))
 		return
 	}

@@ -41,7 +41,7 @@ func (h requestHandler) GetByID(c *gin.Context) {
 
 func (h requestHandler) GetAll(c *gin.Context) {
 	var request PaginationRequest
-	if err := c.BindQuery(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
@@ -55,7 +55,7 @@ func (h requestHandler) GetAll(c *gin.Context) {
 
 func (h requestHandler) CreateCustomer(c *gin.Context) {
 	var request CreateRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
@@ -69,11 +69,11 @@ func (h requestHandler) CreateCustomer(c *gin.Context) {
 
 func (h requestHandler) UpdateCustomer(c *gin.Context) {
 	var request UpdateRequest
-	if err := c.BindUri(&request); err != nil {
+	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}

@@ -30,7 +30,7 @@ func (h requestHandler) GetAllPendingApproval(c *gin.Context) {
 
 func (h requestHandler) Approve(c *gin.Context) {
 	var request ApproveRequest
-	err := c.BindJSON(&request)
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return

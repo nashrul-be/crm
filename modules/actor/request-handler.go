@@ -42,7 +42,7 @@ func (h requestHandler) GetByID(c *gin.Context) {
 
 func (h requestHandler) GetAllByUsername(c *gin.Context) {
 	var request PaginationRequest
-	if err := c.BindQuery(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
@@ -56,7 +56,7 @@ func (h requestHandler) GetAllByUsername(c *gin.Context) {
 
 func (h requestHandler) CreateActor(c *gin.Context) {
 	var request CreateRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
@@ -70,7 +70,7 @@ func (h requestHandler) CreateActor(c *gin.Context) {
 
 func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 	var request ChangeActiveRequest
-	if err := c.Bind(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
@@ -84,11 +84,11 @@ func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 
 func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
-	if err := c.BindUri(&request); err != nil {
+	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.BindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
