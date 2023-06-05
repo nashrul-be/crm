@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"nashrul-be/crm/entities"
+	"os"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func GenerateJWT(actor entities.Actor) (string, error) {
 			ID:        "",
 		},
 	}
-	signingKey := []byte("oPL&Hq4z^5W3i6uX1^nEoA5zee5^k^p2")
+	signingKey := []byte(os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString(signingKey)
 	if err != nil {
@@ -38,7 +39,7 @@ func GenerateJWT(actor entities.Actor) (string, error) {
 
 func AuthenticateJWT(token string) (JwtClaims, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("oPL&Hq4z^5W3i6uX1^nEoA5zee5^k^p2"), nil
+		return []byte(os.Getenv("JWT_SECRET")), nil
 	}, jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil {
 		return JwtClaims{}, err
