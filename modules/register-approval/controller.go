@@ -2,11 +2,12 @@ package register_approval
 
 import (
 	"nashrul-be/crm/dto"
+	"nashrul-be/crm/entities"
 )
 
 type ControllerInterface interface {
 	GetAllPendingApproval() (dto.BaseResponse, error)
-	Approve(request ApproveRequest) (dto.BaseResponse, error)
+	Approve(request ApproveRequest, actor entities.Actor) (dto.BaseResponse, error)
 }
 
 func NewController(approvalUseCase RegisterApprovalUseCaseInterface) ControllerInterface {
@@ -29,12 +30,12 @@ func (c controller) GetAllPendingApproval() (dto.BaseResponse, error) {
 	return dto.Success("Success retrieve approval", result), nil
 }
 
-func (c controller) Approve(request ApproveRequest) (dto.BaseResponse, error) {
-	approved, err := c.approvalUseCase.Approve(request.Approve, 1)
+func (c controller) Approve(request ApproveRequest, actor entities.Actor) (dto.BaseResponse, error) {
+	approved, err := c.approvalUseCase.Approve(request.Approve, actor.ID)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}
-	rejected, err := c.approvalUseCase.Rejected(request.Reject, 1)
+	rejected, err := c.approvalUseCase.Rejected(request.Reject, actor.ID)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err
 	}

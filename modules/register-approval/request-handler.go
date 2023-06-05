@@ -3,6 +3,7 @@ package register_approval
 import (
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/dto"
+	"nashrul-be/crm/entities"
 	"net/http"
 )
 
@@ -30,11 +31,12 @@ func (h requestHandler) GetAllPendingApproval(c *gin.Context) {
 
 func (h requestHandler) Approve(c *gin.Context) {
 	var request ApproveRequest
+	actorAny, _ := c.Get("actor")
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
 	}
-	response, err := h.approvalController.Approve(request)
+	response, err := h.approvalController.Approve(request, actorAny.(entities.Actor))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 	}
