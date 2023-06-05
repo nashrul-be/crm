@@ -8,9 +8,9 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-	ID       uint
-	Username string `json:"username" binding:"printascii"`
-	Password string `json:"password" binding:"printascii"`
+	ID       uint   `uri:"id" binding:"required,numeric"`
+	Username string `json:"username" binding:"omitempty,printascii"`
+	Password string `json:"password" binding:"omitempty,printascii"`
 }
 
 type ChangeActiveRequest struct {

@@ -1,7 +1,6 @@
 package customer
 
 import (
-	"errors"
 	"nashrul-be/crm/entities"
 	"nashrul-be/crm/repositories"
 )
@@ -59,14 +58,7 @@ func (uc useCase) CreateCustomer(customer *entities.Customer) (err error) {
 }
 
 func (uc useCase) UpdateCustomer(customer *entities.Customer) (err error) {
-	exist, err := uc.customerRepository.IsExist(customer.ID)
-	if err != nil {
-		return
-	}
-	if !exist {
-		return errors.New("customer doesn't exist")
-	}
-	err = uc.customerRepository.Save(customer)
+	err = uc.customerRepository.Update(customer)
 	return
 }
 

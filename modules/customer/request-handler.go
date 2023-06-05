@@ -68,19 +68,16 @@ func (h requestHandler) CreateCustomer(c *gin.Context) {
 }
 
 func (h requestHandler) UpdateCustomer(c *gin.Context) {
-	var request CreateRequest
-	uriParam := c.Param("id")
-	id, err := strconv.Atoi(uriParam)
-	if err != nil {
+	var request UpdateRequest
+	if err := c.BindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	err = c.BindJSON(&request)
-	if err != nil {
+	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	response, err := h.customerController.UpdateCustomer(uint(id), request)
+	response, err := h.customerController.UpdateCustomer(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return

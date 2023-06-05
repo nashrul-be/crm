@@ -11,6 +11,16 @@ func mapCreateRequestToCustomer(request CreateRequest) entities.Customer {
 	}
 }
 
+func mapUpdateRequestToCustomer(request UpdateRequest) entities.Customer {
+	return entities.Customer{
+		ID:        request.ID,
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
+		Email:     request.Email,
+		Avatar:    request.Avatar,
+	}
+}
+
 func mapCustomerToResponse(customer entities.Customer) Representation {
 	return Representation{
 		FirstName: customer.FirstName,

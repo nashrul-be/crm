@@ -7,6 +7,14 @@ type CreateRequest struct {
 	Avatar    string `json:"avatar"`
 }
 
+type UpdateRequest struct {
+	ID        uint   `uri:"id" binding:"required,numeric"`
+	FirstName string `binding:"omitempty,alpha" json:"first_name"`
+	LastName  string `binding:"omitempty,alpha" json:"last_name"`
+	Email     string `binding:"omitempty,email" json:"email"`
+	Avatar    string `json:"avatar"`
+}
+
 type Representation struct {
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`

@@ -14,7 +14,7 @@ type ControllerInterface interface {
 	GetByID(id uint) (dto.BaseResponse, error)
 	CreateCustomer(req CreateRequest) (dto.BaseResponse, error)
 	GetAll(req PaginationRequest) (dto.BaseResponse, error)
-	UpdateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error)
+	UpdateCustomer(req UpdateRequest) (dto.BaseResponse, error)
 	DeleteCustomer(id uint) error
 }
 
@@ -91,9 +91,8 @@ func (c controller) CreateCustomer(req CreateRequest) (dto.BaseResponse, error) 
 	return dto.Created("Success create customer", response), nil
 }
 
-func (c controller) UpdateCustomer(id uint, req CreateRequest) (dto.BaseResponse, error) {
-	customer := mapCreateRequestToCustomer(req)
-	customer.ID = id
+func (c controller) UpdateCustomer(req UpdateRequest) (dto.BaseResponse, error) {
+	customer := mapUpdateRequestToCustomer(req)
 	validationError, err := c.customerUseCase.ValidateCustomer(customer, validateId, validateEmail)
 	if err != nil {
 		return dto.ErrorInternalServerError(), err

@@ -41,18 +41,10 @@ func (h requestHandler) GetByID(c *gin.Context) {
 }
 
 func (h requestHandler) GetAllByUsername(c *gin.Context) {
-	//TODO: bind to struct
-	perPage, _ := strconv.Atoi(c.Query("perpage"))
-	page, _ := strconv.Atoi(c.Query("page"))
-	username := c.Query("username")
-	if perPage < 1 || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest("perPage or page must be more than zero"))
+	var request PaginationRequest
+	if err := c.BindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
-	}
-	request := PaginationRequest{
-		PerPage:  uint(perPage),
-		Page:     uint(page),
-		Username: username,
 	}
 	response, err := h.actorController.GetAllByUsername(request)
 	if err != nil {
@@ -92,18 +84,14 @@ func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 
 func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
-	uriParam := c.Param("id")
-	id, err := strconv.Atoi(uriParam)
-	if err != nil {
+	if err := c.BindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	err = c.BindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
-		return
-	}
-	request.ID = uint(id)
 	response, err := h.actorController.UpdateActor(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
@@ -119,8 +107,7 @@ func (h requestHandler) DeleteActor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorBadRequest(err.Error()))
 		return
 	}
-	err = h.actorController.DeleteActor(uint(id))
-	if err != nil {
+	if err := h.actorController.DeleteActor(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 	}
 	c.JSON(http.StatusNoContent, nil)
