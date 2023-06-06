@@ -3,6 +3,7 @@ package actor
 import (
 	"github.com/gin-gonic/gin"
 	"nashrul-be/crm/dto"
+	"nashrul-be/crm/entities"
 	"net/http"
 	"strconv"
 )
@@ -82,10 +83,12 @@ func (h requestHandler) ChangeActiveActor(c *gin.Context) {
 
 func (h requestHandler) UpdateActor(c *gin.Context) {
 	var request UpdateRequest
-	if err := c.ShouldBindUri(&request); err != nil {
-		c.JSON(http.StatusBadRequest, actorNotFound())
+	actor, exist := c.Get("actor")
+	if !exist {
+		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
 		return
 	}
+	request.ID = actor.(entities.Actor).ID
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorValidation(err))
 		return
