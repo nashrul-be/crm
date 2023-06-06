@@ -1,7 +1,7 @@
 # README #
 
 ## API Contract
-find the api documentation at the following postman
+find the api documentation at request_example.postman_collection file
 ## Setup
 
 1. Install Go version 1.19

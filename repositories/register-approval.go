@@ -11,6 +11,7 @@ type RegisterApprovalRepositoryInterface interface {
 	GetByAdminID(id uint) (approval entities.RegisterApproval, err error)
 	GetByAdminIdBatch(id []uint) (approvals []entities.RegisterApproval, err error)
 	Update(approval *entities.RegisterApproval) (err error)
+	DeleteByAdminId(id uint) (err error)
 	InitTransaction() (*gorm.DB, error)
 	Begin(db *gorm.DB) RegisterApprovalRepositoryInterface
 }
@@ -57,5 +58,10 @@ func (r registerApprovalRepository) GetByAdminIdBatch(id []uint) (approvals []en
 
 func (r registerApprovalRepository) Update(approval *entities.RegisterApproval) (err error) {
 	err = r.db.Updates(approval).Error
+	return
+}
+
+func (r registerApprovalRepository) DeleteByAdminId(id uint) (err error) {
+	err = r.db.Where("admin_id = ?", id).Delete(&entities.RegisterApproval{}).Error
 	return
 }

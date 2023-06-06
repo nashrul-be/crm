@@ -7,7 +7,9 @@ if (is authenticated?) then (yes)
   if (is super admin?) then (yes)
     if (is id exist?) then (yes)
       if (is username unique?) then (yes)
-        :register user;
+        :delete register-approval
+        by user id ;
+        :delete user;
       endif
     endif
   endif
