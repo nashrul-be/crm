@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Incoming request;
+if (is authenticated?) then (yes)
+    if (is email unique?) then (yes)
+      :create customer;
+  endif
+endif
+stop
+@enduml

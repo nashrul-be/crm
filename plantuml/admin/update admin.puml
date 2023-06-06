@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Incoming request;
+if (is authenticated?) then (yes)
+  if (is id exist?) then (yes)
+    if (is username unique?) then (yes)
+      :register user;
+    endif
+  endif
+endif
+stop
+@enduml

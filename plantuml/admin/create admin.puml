@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Incoming request;
+if (is authenticated?) then (yes)
+  if (is username unique?) then (yes)
+    :set role to admin;
+    :set active and verified
+    status to false;
+    :register admin;
+    :add register approval
+    for this admin;
+  endif
+endif
+stop
+@enduml

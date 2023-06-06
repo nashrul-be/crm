@@ -17,11 +17,7 @@ import (
 	"strings"
 )
 
-func main() {
-	if err := godotenv.Load(); err != nil {
-		panic(err.Error())
-	}
-
+func registerTranslator() error {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
 			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
@@ -31,8 +27,19 @@ func main() {
 			return name
 		})
 		if err := en.RegisterDefaultTranslations(v, translate.DefaultTranslator()); err != nil {
-			panic(err.Error())
+			return err
 		}
+	}
+	return nil
+}
+
+func main() {
+	if err := godotenv.Load(); err != nil {
+		panic(err.Error())
+	}
+
+	if err := registerTranslator(); err != nil {
+		panic(err.Error())
 	}
 
 	engine := gin.Default()
