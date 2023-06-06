@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Incoming request;
+:Get admin by username;
+if (is admin exist?) then (true)
+  if (is password match?) then (yes)
+    if (is admin active?) then (yes)
+      if (is admin verified?) then (yes)
+         :generate token;
+      endif
+    endif
+  endif
+endif
+stop
+@enduml

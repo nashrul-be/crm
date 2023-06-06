@@ -1,0 +1,16 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Incoming request;
+if (is authenticated?) then (yes)
+  if (is super admin?) then (yes)
+    if (is username exist?) then (yes)
+      :get admin by username;
+      if (is admin verified?) then (yes)
+        :activate account;
+    endif
+  endif
+endif
+stop
+@enduml
