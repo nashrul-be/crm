@@ -21,6 +21,7 @@ func NewRoute(actorRepository repositories.ActorRepositoryInterface,
 }
 
 func (r Route) Handle(router *gin.Engine) {
+	router.POST("/register", r.actorRequestHandler.CreateActor) //too lazy to move it to authenticate package
 	actor := router.Group("/actors", middleware.Authenticate())
 	actor.GET("/:id", r.actorRequestHandler.GetByID)
 	actor.GET("", r.actorRequestHandler.GetAllByUsername)
