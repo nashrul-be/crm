@@ -136,6 +136,20 @@ func (uc useCase) DeactivateActor(username string) error {
 }
 
 func (uc useCase) DeleteActor(id uint) (err error) {
-	err = uc.actorRepository.Delete(id)
+	tx, err := uc.actorRepository.InitTransaction()
+	if err != nil {
+		return
+	}
+	actorTx := uc.actorRepository.Begin(tx)
+	registerApprovalTx := uc.registerApprovalRepository.Begin(tx)
+	if err = registerApprovalTx.DeleteByAdminId(id); err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = actorTx.Delete(id); err != nil {
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
 	return
 }
