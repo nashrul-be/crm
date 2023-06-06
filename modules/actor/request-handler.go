@@ -86,6 +86,7 @@ func (h requestHandler) UpdateActor(c *gin.Context) {
 	actor, exist := c.Get("actor")
 	if !exist {
 		c.JSON(http.StatusInternalServerError, dto.ErrorInternalServerError())
+		return
 	}
 	request.ID = actor.(entities.Actor).ID
 	if err := c.ShouldBindJSON(&request); err != nil {
