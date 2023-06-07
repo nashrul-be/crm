@@ -49,10 +49,14 @@ func main() {
 		panic(err.Error())
 	}
 
+	//db.Migrate(dbConn)
+
 	userRepo := repositories.NewCustomerRepository(dbConn)
 	actorRepo := repositories.NewActorRepository(dbConn)
 	roleRepo := repositories.NewRoleRepository(dbConn)
 	approvalRepo := repositories.NewRegisterApprovalRepository(dbConn)
+
+	//db.Seed(dbConn, actorRepo, roleRepo, approvalRepo)
 
 	userRoute := customer.NewRoute(userRepo)
 	userRoute.Handle(engine)
