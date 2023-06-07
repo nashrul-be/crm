@@ -66,7 +66,9 @@ func Seed(db *gorm.DB, actorRepo repositories.ActorRepositoryInterface,
 		db.Model(&entities.Actor{}).InnerJoins("Role").
 			Where("role_name = ?", "super_admin").First(&oldSuperAdmin)
 		actorUsecase := actor.NewUseCase(actorRepo, roleRepo, approvalRepo)
-		actorUsecase.DeleteActor(oldSuperAdmin.ID)
+		if err := actorUsecase.DeleteActor(oldSuperAdmin.ID); err != nil {
+			panic("can't delete old super admin")
+		}
 		superAdminUsername := os.Getenv("SUPER_ADMIN_USERNAME")
 		if superAdminUsername == "" {
 			superAdminUsername = "super_admin"
