@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/translations/en"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 	"nashrul-be/crm/modules/actor"
 	"nashrul-be/crm/modules/authentication"
 	"nashrul-be/crm/modules/customer"
@@ -15,6 +16,7 @@ import (
 	"nashrul-be/crm/utils/translate"
 	"reflect"
 	"strings"
+	"time"
 )
 
 func registerTranslator() error {
@@ -44,19 +46,27 @@ func main() {
 
 	engine := gin.Default()
 
-	dbConn, err := db.DefaultConnection()
+	var dbConn *gorm.DB
+	var err error
+	for i := 0; i < 10; i++ {
+		dbConn, err = db.DefaultConnection()
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
 	if err != nil {
 		panic(err.Error())
 	}
 
-	//db.Migrate(dbConn)
+	db.Migrate(dbConn)
 
 	userRepo := repositories.NewCustomerRepository(dbConn)
 	actorRepo := repositories.NewActorRepository(dbConn)
 	roleRepo := repositories.NewRoleRepository(dbConn)
 	approvalRepo := repositories.NewRegisterApprovalRepository(dbConn)
 
-	//db.Seed(dbConn, actorRepo, roleRepo, approvalRepo)
+	db.Seed(dbConn, actorRepo, roleRepo, approvalRepo)
 
 	userRoute := customer.NewRoute(userRepo)
 	userRoute.Handle(engine)
