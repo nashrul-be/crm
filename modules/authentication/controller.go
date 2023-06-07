@@ -29,11 +29,8 @@ func (c controller) Login(request LoginRequest) (dto.BaseResponse, error) {
 	if err := hash.Compare(request.Password, account.Password); err != nil {
 		return defaultResponse, err
 	}
-	if !account.Verified {
-		return dto.ErrorUnauthorized("Your account not verified yet"), err
-	}
-	if !account.Active {
-		return dto.ErrorUnauthorized("Your account has been deactivated"), err
+	if err := account.CanLogin(); err != nil {
+		return dto.ErrorUnauthorized(err.Error()), nil
 	}
 	token, err := jwtUtil.GenerateJWT(account)
 	if err != nil {
