@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"nashrul-be/crm/entities"
+	"nashrul-be/crm/utils/db"
 	"time"
 )
 
@@ -14,12 +15,12 @@ type ActorRepositoryInterface interface {
 	GetByUsernameBatch(username []string) (actors []entities.Actor, err error)
 	IsUsernameExist(actor entities.Actor) (exist bool, err error)
 	IsExist(id uint) (exist bool, err error)
-	Create(customer *entities.Actor) (err error)
-	Update(customer *entities.Actor) (err error)
-	Save(actor *entities.Actor) (err error)
+	Create(actor entities.Actor) (result entities.Actor, err error)
+	Update(actor entities.Actor) (err error)
+	Save(actor entities.Actor) (err error)
 	Delete(id uint) (err error)
-	InitTransaction() (*gorm.DB, error)
-	Begin(db *gorm.DB) ActorRepositoryInterface
+	InitTransaction() (db.Transactor, error)
+	Begin(transactor db.Transactor) ActorRepositoryInterface
 }
 
 func NewActorRepository(db *gorm.DB) ActorRepositoryInterface {
@@ -30,16 +31,16 @@ type actorRepository struct {
 	db *gorm.DB
 }
 
-func (r actorRepository) InitTransaction() (*gorm.DB, error) {
+func (r actorRepository) InitTransaction() (db.Transactor, error) {
 	tx := r.db.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return tx, nil
+	return db.NewTransactor(tx), nil
 }
 
-func (r actorRepository) Begin(db *gorm.DB) ActorRepositoryInterface {
-	return actorRepository{db: db}
+func (r actorRepository) Begin(transactor db.Transactor) ActorRepositoryInterface {
+	return actorRepository{db: transactor.GetDB()}
 }
 
 func (r actorRepository) GetByID(id uint) (actor entities.Actor, err error) {
@@ -83,28 +84,29 @@ func (r actorRepository) IsUsernameExist(actor entities.Actor) (exist bool, err 
 	return
 }
 
-func (r actorRepository) Create(customer *entities.Actor) (err error) {
-	err = r.db.Create(customer).Error
+func (r actorRepository) Create(actor entities.Actor) (result entities.Actor, err error) {
+	result = actor
+	err = r.db.Create(&result).Error
 	return
 }
 
-func (r actorRepository) Update(customer *entities.Actor) (err error) {
-	err = r.db.Updates(customer).Error
+func (r actorRepository) Update(actor entities.Actor) (err error) {
+	err = r.db.Updates(&actor).Error
 	return
 }
 
-func (r actorRepository) Save(customer *entities.Actor) (err error) {
-	if customer.CreatedAt.IsZero() {
-		customer.CreatedAt = time.Now()
+func (r actorRepository) Save(actor entities.Actor) (err error) {
+	if actor.CreatedAt.IsZero() {
+		actor.CreatedAt = time.Now()
 	}
-	exist, err := r.IsExist(customer.ID)
+	exist, err := r.IsExist(actor.ID)
 	if err != nil {
 		return
 	}
 	if !exist {
 		return errors.New("actor doesn't exist")
 	}
-	err = r.db.Save(customer).Error
+	err = r.db.Save(&actor).Error
 	return
 }
 
