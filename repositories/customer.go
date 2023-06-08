@@ -11,9 +11,9 @@ type CustomerRepositoryInterface interface {
 	GetAll(limit, offset uint) (customers []entities.Customer, err error)
 	GetAllByEmail(email string, limit, offset uint) (customers []entities.Customer, err error)
 	GetAllByName(name string, limit, offset uint) (customers []entities.Customer, err error)
-	Create(customer *entities.Customer) (err error)
-	Update(customer *entities.Customer) (err error)
-	Save(customer *entities.Customer) (err error)
+	Create(customer entities.Customer) (result entities.Customer, err error)
+	Update(customer entities.Customer) (err error)
+	Save(customer entities.Customer) (err error)
 	Delete(id uint) (err error)
 	IsExist(id uint) (exist bool, err error)
 	IsEmailExist(customer entities.Customer) (bool, error)
@@ -70,19 +70,19 @@ func (r customerRepository) GetByID(id uint) (customer entities.Customer, err er
 	return
 }
 
-func (r customerRepository) Create(customer *entities.Customer) (err error) {
-	err = r.db.Create(customer).Error
+func (r customerRepository) Create(customer entities.Customer) (result entities.Customer, err error) {
+	err = r.db.Create(&customer).Error
 	return
 }
 
-func (r customerRepository) Update(customer *entities.Customer) (err error) {
-	err = r.db.Updates(customer).Error
+func (r customerRepository) Update(customer entities.Customer) (err error) {
+	err = r.db.Updates(&customer).Error
 	return
 }
 
-func (r customerRepository) Save(customer *entities.Customer) (err error) {
+func (r customerRepository) Save(customer entities.Customer) (err error) {
 	customer.CreatedAt = time.Now()
-	err = r.db.Save(customer).Error
+	err = r.db.Save(&customer).Error
 	return
 }
 

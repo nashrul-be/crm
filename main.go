@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10/translations/en"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
+	"nashrul-be/crm/migrations"
 	"nashrul-be/crm/modules/actor"
 	"nashrul-be/crm/modules/authentication"
 	"nashrul-be/crm/modules/customer"
@@ -59,14 +60,14 @@ func main() {
 		panic(err.Error())
 	}
 
-	db.Migrate(dbConn)
+	migrations.Migrate(dbConn)
 
 	userRepo := repositories.NewCustomerRepository(dbConn)
 	actorRepo := repositories.NewActorRepository(dbConn)
 	roleRepo := repositories.NewRoleRepository(dbConn)
 	approvalRepo := repositories.NewRegisterApprovalRepository(dbConn)
 
-	db.Seed(dbConn, actorRepo, roleRepo, approvalRepo)
+	migrations.Seed(dbConn, actorRepo, roleRepo, approvalRepo)
 
 	userRoute := customer.NewRoute(userRepo)
 	userRoute.Handle(engine)

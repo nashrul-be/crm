@@ -1,4 +1,4 @@
-package db
+package migrations
 
 import (
 	migrate "github.com/rubenv/sql-migrate"
@@ -95,7 +95,7 @@ func Seed(db *gorm.DB, actorRepo repositories.ActorRepositoryInterface,
 		}
 		approval.Status = "approved"
 		approval.SuperAdminID = superAdmin.ID
-		approvalRepo.Update(&approval)
+		approvalRepo.Update(approval)
 	}
 	return nil
 }

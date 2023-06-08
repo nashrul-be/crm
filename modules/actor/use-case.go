@@ -86,12 +86,12 @@ func (uc useCase) CreateActor(actor *entities.Actor) (err error) {
 	}
 	actorTx := uc.actorRepository.Begin(tx)
 	registerApprovalTx := uc.registerApprovalRepository.Begin(tx)
-	if err = actorTx.Create(actor); err != nil {
+	if *actor, err = actorTx.Create(*actor); err != nil {
 		tx.Rollback()
 		return
 	}
-	approval := &entities.RegisterApproval{AdminID: actor.ID, Status: "pending"}
-	if err = registerApprovalTx.Create(approval); err != nil {
+	approval := entities.RegisterApproval{AdminID: actor.ID, Status: "pending"}
+	if _, err = registerApprovalTx.Create(approval); err != nil {
 		tx.Rollback()
 		return
 	}
@@ -107,7 +107,7 @@ func (uc useCase) UpdateActor(actor *entities.Actor) (err error) {
 			return
 		}
 	}
-	err = uc.actorRepository.Update(actor)
+	err = uc.actorRepository.Update(*actor)
 	if err != nil {
 		return
 	}
@@ -124,7 +124,7 @@ func (uc useCase) changeActiveActor(username string, value bool) error {
 		return errors.New("actor not verified yet")
 	}
 	actor.Active = value
-	return uc.actorRepository.Save(&actor)
+	return uc.actorRepository.Save(actor)
 }
 
 func (uc useCase) ActivateActor(username string) error {
