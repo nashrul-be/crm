@@ -71,12 +71,12 @@ func (uc registerApprovalUseCase) approved(
 	actorTx := uc.actorRepository.Begin(tx)
 	registerTx := uc.registerRepository.Begin(tx)
 	*approval = approval.Approve(superAdminID)
-	if err = registerTx.Update(approval); err != nil {
+	if err = registerTx.Update(*approval); err != nil {
 		tx.Rollback()
 		return
 	}
 	*actor = actor.Verify().Activate()
-	if err = actorTx.Update(actor); err != nil {
+	if err = actorTx.Update(*actor); err != nil {
 		tx.Rollback()
 		return
 	}
@@ -114,7 +114,7 @@ func (uc registerApprovalUseCase) Rejected(username []string, superAdminID uint)
 
 func (uc registerApprovalUseCase) rejected(approval *entities.RegisterApproval, superAdminID uint) (err error) {
 	*approval = approval.Reject(superAdminID)
-	if err = uc.registerRepository.Update(approval); err != nil {
+	if err = uc.registerRepository.Update(*approval); err != nil {
 		return
 	}
 	return

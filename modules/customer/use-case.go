@@ -54,11 +54,12 @@ func (uc useCase) GetAllByName(name string, limit, offset uint) (customers []ent
 }
 
 func (uc useCase) CreateCustomer(customer *entities.Customer) (err error) {
-	return uc.customerRepository.Create(customer)
+	_, err = uc.customerRepository.Create(*customer)
+	return err
 }
 
 func (uc useCase) UpdateCustomer(customer *entities.Customer) (err error) {
-	err = uc.customerRepository.Update(customer)
+	err = uc.customerRepository.Update(*customer)
 	return
 }
 
