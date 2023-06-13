@@ -26,7 +26,7 @@ jobs:
         run: sudo apt update && sudo apt -y install mockery
   
       - name: Generate mock
-        run: mockery --dir ./repositories --output ./repositories/mocks --all
+        run: go clean -modcache && mockery --dir ./repositories --output ./repositories/mocks --all --keeptree --with-expecter
       
       - name: Build
         run: go build -v ./...
